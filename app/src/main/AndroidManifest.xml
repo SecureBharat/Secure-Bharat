@@ -3,9 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <!-- ✅ Permissions -->
-    <uses-permission android:name="android.permission.RECEIVE_SMS" />
-    <uses-permission android:name="android.permission.READ_SMS" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS"/>
+    <uses-permission android:name="android.permission.READ_SMS"/>
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <!-- ✅ Optional Feature -->
@@ -24,27 +24,41 @@
         <!-- ✅ Main Activity -->
         <activity
             android:name=".MainActivity"
-            android:exported="true"> <!-- Required for Android 12+ -->
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <!-- ✅ SMS Broadcast Receiver -->
+        <!-- ✅ SMSRetriever Broadcast Receiver -->
         <receiver
             android:name=".SMSReceiver"
-            android:exported="true">
+            android:exported="true"
+            android:permission="com.google.android.gms.auth.api.phone.permission.SEND">
             <intent-filter>
-                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+                <action android:name="com.google.android.gms.auth.api.phone.SMS_RETRIEVED" />
             </intent-filter>
         </receiver>
 
-        <!-- ✅ Floating Popup Service -->
+        <!-- ✅ Scam Popup Service -->
         <service
             android:name=".ScamPopupService"
             android:exported="false"
             android:foregroundServiceType="specialUse" />
+
+
+        <service
+            android:name=".SMSNotificationListener"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
     </application>
+
 
 </manifest>

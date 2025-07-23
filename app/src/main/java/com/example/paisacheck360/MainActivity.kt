@@ -22,6 +22,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         checkAndRequestPermissions()
+        requestNotificationAccess() // ✅ added this here to trigger notification listener access
     }
 
     private fun checkAndRequestPermissions() {
@@ -78,6 +79,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun requestNotificationAccess() {
+        val intent = Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS")
+        startActivity(intent)
+    }
+
     // ✅ Handle permission results
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -95,7 +101,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ✅ Handle overlay permission result (optional for future enhancement)
+    // ✅ Handle overlay permission result
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == OVERLAY_PERMISSION_CODE) {
