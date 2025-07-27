@@ -5,9 +5,9 @@
 > 👨‍💻 Developers
 Aditya – Lead developer, logic, coordinator
 
-Disha – UI Designer, Alert Flow
+> Disha – UI Designer, Alert Flow
 
-Sujay – Testing, Documentation
+> Sujay – Testing, Documentation
 
 ---
 
