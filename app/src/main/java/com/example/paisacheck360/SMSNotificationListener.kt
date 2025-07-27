@@ -1,35 +1,40 @@
 package com.example.paisacheck360
 
-import android.content.Intent
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
+import android.content.Intent
+import android.os.Build
 
 class SMSNotificationListener : NotificationListenerService() {
 
-    private val scamKeywords = listOf("fraud", "otp", "bank", "refund", "kbc", "lottery", "winner")
+    private val scamKeywords = listOf("win", "click here", "lottery", "urgent", "OTP", "claim", "reward", "offer")
 
-    override fun onNotificationPosted(sbn: StatusBarNotification) {
+    override fun onNotificationPosted(sbn: StatusBarNotification?) {
+        if (sbn == null) return
+
         val packageName = sbn.packageName
         val extras = sbn.notification.extras
+
         val title = extras.getString("android.title") ?: ""
         val text = extras.getCharSequence("android.text")?.toString() ?: ""
 
-        val fullMessage = "$title\n$text"
-        Log.d("SMSNotification", "From: $packageName\nMessage: $fullMessage")
+        // Log to check real content
+        Log.d("SMSNotifyListener", "Package: $packageName, Title: $title, Text: $text")
 
-        val lowerMsg = fullMessage.lowercase()
-        if (scamKeywords.any { lowerMsg.contains(it) }) {
-            // ✅ Launch ScamPopupService to show warning — same as your SMSReceiver logic
-            val intent = Intent(this, ScamPopupService::class.java).apply {
-                putExtra("scam_message", fullMessage)
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        // 🔍 Simple scam keyword check
+        if (scamKeywords.any { text.contains(it, ignoreCase = true) }) {
+            val alertIntent = Intent(this, ScamPopupService::class.java).apply {
+                putExtra("sms_body", "$title: $text")
             }
-            startService(intent)
-        }
-    }
 
-    override fun onNotificationRemoved(sbn: StatusBarNotification) {
-        // Optional: handle if needed
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(alertIntent)
+            } else {
+                startService(alertIntent)
+            }
+
+            Log.d("SMSNotifyListener", "⚠️ Scam SMS Detected from $packageName!")
+        }
     }
 }

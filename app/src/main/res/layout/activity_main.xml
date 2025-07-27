@@ -1,208 +1,193 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="#F9F9F9"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#F9F9F9"
+    android:padding="16dp">
 
     <LinearLayout
-        android:padding="16dp"
-        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <!-- Header -->
+        <!-- App Title -->
         <TextView
+            android:id="@+id/appTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableStart="@drawable/ic_shield"
+            android:drawablePadding="8dp"
+            android:paddingBottom="16dp"
             android:text="Secure Bharat"
-            android:textSize="22sp"
-            android:textColor="#202124"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <!-- Learn to Stay Safe -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Learn to Stay Safe"
+            android:textSize="16sp"
             android:textStyle="bold"
-            android:gravity="center"
+            android:textColor="#0077B6"
+            android:paddingBottom="8dp" />
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="#DFF2FF"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp">
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_weight="1"
+                android:scaleType="centerCrop"
+                android:src="@drawable/qr_edu_2" />
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/upi_edu_1" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/viewAllVideos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="View All Videos"
+            android:textColor="#000000"
+            android:backgroundTint="#FFD166"
+            android:layout_gravity="start"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Quick Security Tools -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="8dp"
+            android:text="Quick Security Tools"
+            android:textColor="#4E4949"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
         <!-- Scam Summary -->
         <LinearLayout
-            android:orientation="vertical"
-            android:padding="16dp"
-            android:background="#E3F2FD"
-            android:layout_marginTop="16dp"
-            android:elevation="2dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:text="Scam Summary"
-                android:textColor="#0D47A1"
-                android:textStyle="bold"
-                android:textSize="18sp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                android:text="Last 7 Days: 3 scams blocked\n📩 SMS: 2 blocked\n💸 UPI: 1 flagged"
-                android:textColor="#333"
-                android:layout_marginTop="8dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <Button
-                android:text="🔍 Tap to View Detailed Report"
-                android:backgroundTint="#1976D2"
-                android:textColor="#FFF"
-                android:layout_marginTop="12dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
-
-        <!-- Quick Tools -->
-        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:background="#DFF2FF"
             android:orientation="vertical"
-            android:padding="16dp"
-            android:background="#FFFFFF"
-            android:layout_marginTop="16dp"
-            android:elevation="2dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:padding="12dp">
 
-            <Button
-                android:text="🔍 Scan UPI ID"
-                android:backgroundTint="#4CAF50"
-                android:textColor="#FFF"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <Button
-                android:text="🔗 Check Link"
-                android:backgroundTint="#03A9F4"
-                android:textColor="#FFF"
-                android:layout_marginTop="10dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <Button
-                android:text="📞 Fraud Number Lookup"
-                android:backgroundTint="#FF9800"
-                android:textColor="#FFF"
-                android:layout_marginTop="10dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
-
-        <!-- Education Section -->
-        <LinearLayout
-            android:orientation="vertical"
-            android:padding="16dp"
-            android:background="#E3F2FD"
-            android:layout_marginTop="16dp"
-            android:elevation="2dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:text="🎓 Learn to Stay Safe"
-                android:textColor="#E65100"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <!-- Horizontal Scrollable Video Thumbnails -->
-            <HorizontalScrollView
+            <androidx.appcompat.widget.AppCompatButton
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp">
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/btn_outline"
+                android:drawableStart="@drawable/ic_search"
+                android:drawablePadding="8dp"
+                android:padding="12dp"
+                android:rotationX="0"
+                android:text="Scan UPI ID"
+                android:textAlignment="center"
+                android:textColor="#0077B6"
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
-                <LinearLayout
-                    android:orientation="horizontal"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-
-                    <LinearLayout
-                        android:orientation="vertical"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="12dp">
-
-                        <ImageView
-                            android:id="@+id/thumb1"
-                            android:src="@drawable/upi_edu_1"
-                            android:layout_width="160dp"
-                            android:layout_height="100dp"
-                            android:scaleType="centerCrop"
-                            android:contentDescription="How UPI scams happen" />
-
-                        <TextView
-                            android:text="How UPI scams happen"
-                            android:textSize="14sp"
-                            android:textColor="#444"
-                            android:layout_marginTop="4dp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:orientation="vertical"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="12dp">
-
-                        <ImageView
-                            android:id="@+id/thumb2"
-                            android:src="@drawable/qr_edu_2"
-                            android:layout_width="160dp"
-                            android:layout_height="100dp"
-                            android:scaleType="centerCrop"
-                            android:contentDescription="Spot fake QR codes" />
-
-                        <TextView
-                            android:text="Spot fake QR codes"
-                            android:textSize="14sp"
-                            android:textColor="#444"
-                            android:layout_marginTop="4dp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
-                    </LinearLayout>
-
-                    <!-- Add more cards similarly -->
-                </LinearLayout>
-            </HorizontalScrollView>
-
-            <!-- View All Videos Button -->
-            <Button
-                android:text="🎬 View All Videos"
-                android:backgroundTint="#FF5722"
-                android:textColor="#FFF"
-                android:layout_marginTop="16dp"
+            <androidx.appcompat.widget.AppCompatButton
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/btn_outline"
+                android:drawableStart="@drawable/ic_link"
+                android:drawablePadding="8dp"
+                android:padding="12dp"
+                android:rotationX="0"
+                android:text="link"
+                android:textAlignment="center"
+                android:textColor="#0077B6"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/btn_outline"
+                android:drawableStart="@drawable/ic_search"
+                android:drawablePadding="8dp"
+                android:padding="12dp"
+                android:rotationX="0"
+                android:text="Scan UPI ID"
+                android:textAlignment="center"
+                android:textColor="#0077B6"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/btn_outline"
+                android:drawableStart="@drawable/ic_search"
+                android:drawablePadding="8dp"
+                android:padding="12dp"
+                android:rotationX="0"
+                android:text="Scan UPI ID"
+                android:textAlignment="center"
+                android:textColor="#0077B6"
+                android:textSize="16sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
-
-        <!-- Alerts -->
         <LinearLayout
-            android:orientation="horizontal"
-            android:padding="12dp"
-            android:layout_marginTop="16dp"
-            android:background="#FFEBEE"
-            android:elevation="1dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#DFF2FF"
+            android:padding="16dp"
+            android:layout_marginBottom="24dp"
+            android:backgroundTint="#DFF2FF"
+            android:elevation="2dp"
+            android:background="@drawable/bg_card">
 
             <TextView
-                android:text="🚨 New Paytm scam alert active!"
-                android:textColor="#C62828"
-                android:textStyle="bold"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:text="Scam Summary"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#0077B6"
+                android:paddingBottom="4dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Last 7 Days: 3 scams blocked"
+                android:textSize="14sp"
+                android:paddingBottom="2dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📩 SMS scams: 2 blocked\n🏦 UPI scams: 1 flagged"
+                android:textSize="14sp" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tap to view detailed report"
+                android:textColor="#000000"
+                android:backgroundTint="#FFD166"
+                android:layout_marginTop="8dp" />
         </LinearLayout>
 
-        <!-- Elder Mode -->
-        <Button
-            android:text="👵 Elder Mode"
-            android:backgroundTint="#9C27B0"
-            android:textColor="#FFF"
-            android:layout_marginTop="20dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
     </LinearLayout>
 </ScrollView>

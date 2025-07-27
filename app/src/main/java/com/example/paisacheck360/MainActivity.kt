@@ -1,6 +1,7 @@
 package com.example.paisacheck360
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -11,6 +12,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -111,5 +113,13 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "Overlay permission denied ❌", Toast.LENGTH_LONG).show()
             }
         }
+    }
+}
+fun checkNotificationAccessPermission(context: Context) {
+    if (!Settings.Secure.getString(context.contentResolver, "enabled_notification_listeners").contains(context.packageName)) {
+        Toast.makeText(context, "Please enable Notification Access", Toast.LENGTH_LONG).show()
+        val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
     }
 }
