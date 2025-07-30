@@ -12,7 +12,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-
+import com.google.firebase.database.FirebaseDatabase
+import java.security.MessageDigest
 
 class MainActivity : AppCompatActivity() {
 
@@ -23,14 +24,36 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        checkAndRequestPermissions()
+
+        // 🔐 Firebase Secure Login Logic (Android ID + Hashed Password)
+        val androidID = getAndroidID()
+        val password = "123456" // Replace later with EditText input from Login UI
+        val hashedPassword = hashPassword(password)
+
         val db = FirebaseDatabase.getInstance().reference
-        db.child("test").setValue("Firebase Connected Bro!")
+        db.child("users").child(androidID).child("password").setValue(hashedPassword)
+            .addOnSuccessListener {
+                Toast.makeText(this, "✅ User saved securely", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "❌ Failed to save user", Toast.LENGTH_LONG).show()
+            }
+    }
+
+    private fun getAndroidID(): String {
+        return Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+    }
+
+    private fun hashPassword(password: String): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        val result = digest.digest(password.toByteArray())
+        return result.joinToString("") { "%02x".format(it) }
     }
 
     private fun checkAndRequestPermissions() {
         var permissionMessage = ""
 
-        // ✅ 1. Check SMS permissions
         if (!hasSMSPermissions()) {
             requestSMSPermissions()
             permissionMessage += "Requesting SMS permissions...\n"
@@ -38,7 +61,6 @@ class MainActivity : AppCompatActivity() {
             permissionMessage += "SMS permission already granted ✅\n"
         }
 
-        // ✅ 2. Check Overlay permission (for popup alerts)
         if (!canDrawOverlays()) {
             requestOverlayPermission()
             permissionMessage += "Requesting overlay permission...\n"
@@ -86,7 +108,6 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    // ✅ Handle permission results
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -103,7 +124,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ✅ Handle overlay permission result
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == OVERLAY_PERMISSION_CODE) {
@@ -115,8 +135,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
+
+// 🔔 Notification access helper
 fun checkNotificationAccessPermission(context: Context) {
-    if (!Settings.Secure.getString(context.contentResolver, "enabled_notification_listeners").contains(context.packageName)) {
+    if (!Settings.Secure.getString(
+            context.contentResolver,
+            "enabled_notification_listeners"
+        ).contains(context.packageName)
+    ) {
         Toast.makeText(context, "Please enable Notification Access", Toast.LENGTH_LONG).show()
         val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
