@@ -10,31 +10,50 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import com.example.paisacheck360.network.RetrofitClient
+import com.example.paisacheck360.network.SmsRequest
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class SMSReceiver : BroadcastReceiver() {
-
-    private val scamKeywords = listOf("win", "click here", "lottery", "urgent", "OTP", "claim", "reward", "offer")
-
     override fun onReceive(context: Context, intent: Intent) {
         if (Telephony.Sms.Intents.SMS_RECEIVED_ACTION == intent.action) {
             val messages = Telephony.Sms.Intents.getMessagesFromIntent(intent)
             val messageBody = messages.joinToString(" ") { it.messageBody }
 
-            if (scamKeywords.any { messageBody.contains(it, ignoreCase = true) }) {
-                showScamNotification(context, messageBody)
-
-                // Start floating popup alert
-                val alertIntent = Intent(context, ScamPopupService::class.java)
-                alertIntent.putExtra("sms_body", messageBody)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    context.startForegroundService(alertIntent)
-                } else {
-                    context.startService(alertIntent)
-                }
-
-                Toast.makeText(context, "🚨 Scam SMS Detected!", Toast.LENGTH_LONG).show()
-            }
+            checkSmsWithNLP(context, messageBody)
         }
+    }
+
+    private fun checkSmsWithNLP(context: Context, message: String) {
+        val request = SmsRequest(message)
+
+        RetrofitClient.api.predictSms(request).enqueue(object : Callback<com.example.paisacheck360.network.SmsResponse> {
+            override fun onResponse(
+                call: Call<com.example.paisacheck360.network.SmsResponse>,
+                response: Response<com.example.paisacheck360.network.SmsResponse>
+            ) {
+                val result = response.body()
+                if (result != null && result.label.equals("scam", ignoreCase = true)) {
+                    showScamNotification(context, message)
+
+                    val alertIntent = Intent(context, ScamPopupService::class.java)
+                    alertIntent.putExtra("sms_body", message)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        context.startForegroundService(alertIntent)
+                    } else {
+                        context.startService(alertIntent)
+                    }
+
+                    Toast.makeText(context, "🚨 Scam SMS Detected by AI!", Toast.LENGTH_LONG).show()
+                }
+            }
+
+            override fun onFailure(call: Call<com.example.paisacheck360.network.SmsResponse>, t: Throwable) {
+                Toast.makeText(context, "API call failed: ${t.localizedMessage}", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 
     private fun showScamNotification(context: Context, message: String) {
@@ -54,7 +73,7 @@ class SMSReceiver : BroadcastReceiver() {
         }
 
         val builder = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.ic_warning) // Make sure this icon exists in res/drawable
+            .setSmallIcon(R.drawable.ic_warning) // Replace with your icon
             .setContentTitle("⚠️ Scam SMS Detected")
             .setContentText(message.take(60) + "...")
             .setStyle(NotificationCompat.BigTextStyle().bigText(message))

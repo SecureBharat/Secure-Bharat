@@ -23,8 +23,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        checkAndRequestPermissions()
-        requestNotificationAccess() // ✅ added this here to trigger notification listener access
+        val db = FirebaseDatabase.getInstance().reference
+        db.child("test").setValue("Firebase Connected Bro!")
     }
 
     private fun checkAndRequestPermissions() {
