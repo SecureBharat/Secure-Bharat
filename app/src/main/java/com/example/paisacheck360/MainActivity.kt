@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -30,6 +31,25 @@ class MainActivity : AppCompatActivity() {
         val androidID = getAndroidID()
         val password = "123456" // Replace later with EditText input from Login UI
         val hashedPassword = hashPassword(password)
+
+
+        // 🟩 Attach click listeners to navigation TextViews
+        findViewById<TextView>(R.id.sms).setOnClickListener {
+            startActivity(Intent(this, SmsDetectionActivity::class.java))
+        }
+
+        findViewById<TextView>(R.id.link).setOnClickListener {
+            startActivity(Intent(this, FraudLinkDetectionActivity::class.java))
+        }
+
+        findViewById<TextView>(R.id.call).setOnClickListener {
+            startActivity(Intent(this, FraudCallDetectionActivity::class.java))
+        }
+
+        findViewById<TextView>(R.id.ocr).setOnClickListener {
+            startActivity(Intent(this, OCRScannerActivity::class.java))
+        }
+
 
         val db = FirebaseDatabase.getInstance().reference
         db.child("users").child(androidID).child("password").setValue(hashedPassword)

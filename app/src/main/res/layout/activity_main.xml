@@ -159,12 +159,13 @@
                          />
 
                     <TextView
+                        android:id="@+id/sms"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Scan UPI ID"
                         android:textColor="#0077B6"
-                        android:textStyle="bold"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
                 </LinearLayout>
 
                 <!-- Check Link -->
@@ -187,12 +188,13 @@
                          />
 
                     <TextView
+                        android:id="@+id/link"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Check Link"
                         android:textColor="#066EA6"
-                        android:textStyle="bold"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
                 </LinearLayout>
 
                 <!-- Fraud Number Lookup -->
@@ -215,12 +217,13 @@
                         />
 
                     <TextView
+                        android:id="@+id/call"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Fraud Number Lookup"
                         android:textColor="#0077B6"
-                        android:textStyle="bold"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
                 </LinearLayout>
 
                 <!-- OCR Scanner -->
@@ -242,12 +245,13 @@
                        />
 
                     <TextView
+                        android:id="@+id/ocr"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="OCR Scanner"
                         android:textColor="#0077B6"
-                        android:textStyle="bold"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
