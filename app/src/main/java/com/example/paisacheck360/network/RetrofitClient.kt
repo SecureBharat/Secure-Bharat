@@ -6,7 +6,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
     private val retrofit = Retrofit.Builder()
-        .baseUrl("http://YOUR_PC_IP:5000/")  // 🧠 We’ll update this below
+        .baseUrl("https://scam-detector-api.onrender.com/") // ✅ Your deployed server
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 

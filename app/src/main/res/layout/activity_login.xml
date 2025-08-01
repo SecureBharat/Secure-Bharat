@@ -95,13 +95,13 @@
             android:textSize="16sp" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/loginBtn2"
+            android:id="@+id/registerBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:paddingTop="12dp"
             android:paddingBottom="12dp"
-            android:text="Login"
+            android:text="register"
             android:textSize="16sp" />
 
         <LinearLayout
