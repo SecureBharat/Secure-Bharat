@@ -25,10 +25,11 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         checkAndRequestPermissions()
+        checkNotificationAccessPermission(this)
 
         // 🔐 Firebase Secure Login Logic (Android ID + Hashed Password)
         val androidID = getAndroidID()
-        val password = "123456" // Replace later with EditText input from Login UI
+        val password = "123456" // Replace later with EditText input
         val hashedPassword = hashPassword(password)
 
         val db = FirebaseDatabase.getInstance().reference
@@ -54,18 +55,20 @@ class MainActivity : AppCompatActivity() {
     private fun checkAndRequestPermissions() {
         var permissionMessage = ""
 
+        // SMS Permissions
         if (!hasSMSPermissions()) {
             requestSMSPermissions()
             permissionMessage += "Requesting SMS permissions...\n"
         } else {
-            permissionMessage += "SMS permission already granted ✅\n"
+            permissionMessage += "✅ SMS permissions already granted\n"
         }
 
+        // Overlay Permission
         if (!canDrawOverlays()) {
             requestOverlayPermission()
             permissionMessage += "Requesting overlay permission...\n"
         } else {
-            permissionMessage += "Overlay permission already granted ✅\n"
+            permissionMessage += "✅ Overlay permission already granted\n"
         }
 
         Toast.makeText(this, permissionMessage.trim(), Toast.LENGTH_LONG).show()
@@ -103,11 +106,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun requestNotificationAccess() {
-        val intent = Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS")
-        startActivity(intent)
-    }
-
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -117,32 +115,34 @@ class MainActivity : AppCompatActivity() {
 
         if (requestCode == SMS_PERMISSION_CODE) {
             if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
-                Toast.makeText(this, "SMS Permissions Granted ✅", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "✅ SMS permissions granted", Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(this, "SMS Permissions Denied ❌", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "❌ SMS permissions denied", Toast.LENGTH_LONG).show()
             }
         }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+
         if (requestCode == OVERLAY_PERMISSION_CODE) {
             if (canDrawOverlays()) {
-                Toast.makeText(this, "Overlay permission granted ✅", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "✅ Overlay permission granted", Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(this, "Overlay permission denied ❌", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "❌ Overlay permission denied", Toast.LENGTH_LONG).show()
             }
         }
     }
 }
 
-// 🔔 Notification access helper
+// 🔔 Notification Access Helper Function
 fun checkNotificationAccessPermission(context: Context) {
-    if (!Settings.Secure.getString(
-            context.contentResolver,
-            "enabled_notification_listeners"
-        ).contains(context.packageName)
-    ) {
+    val listeners = Settings.Secure.getString(
+        context.contentResolver,
+        "enabled_notification_listeners"
+    )
+
+    if (listeners == null || !listeners.contains(context.packageName)) {
         Toast.makeText(context, "Please enable Notification Access", Toast.LENGTH_LONG).show()
         val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

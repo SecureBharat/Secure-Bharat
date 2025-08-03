@@ -6,7 +6,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
     private val retrofit = Retrofit.Builder()
-        .baseUrl("https://scam-detector-api.onrender.com/") // ✅ Your deployed server
+        .baseUrl("https://backend-k0ri.onrender.com/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
@@ -14,3 +14,4 @@ object RetrofitClient {
         retrofit.create(ApiService::class.java)
     }
 }
+

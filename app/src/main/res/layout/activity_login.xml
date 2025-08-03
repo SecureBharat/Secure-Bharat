@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?android:attr/colorBackground"
+    android:background="@android:color/white"
     android:padding="24dp"
     tools:context=".LoginActivity">
 
@@ -22,7 +22,7 @@
             android:src="@drawable/ic_launcher_foreground"
             android:contentDescription="App Logo"
             android:layout_marginBottom="32dp"
-            app:tint="?attr/colorPrimary" />
+            app:tint="@color/purple_700" />
 
         <TextView
             android:id="@+id/loginTitle"
@@ -30,7 +30,7 @@
             android:layout_height="wrap_content"
             android:text="Welcome Back!"
             android:textSize="28sp"
-            android:textColor="?attr/colorOnBackground"
+            android:textColor="@android:color/black"
             android:textStyle="bold"
             android:layout_marginBottom="8dp" />
 
@@ -40,7 +40,7 @@
             android:layout_height="wrap_content"
             android:text="Please sign in to continue"
             android:textSize="16sp"
-            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textColor="@android:color/darker_gray"
             android:layout_marginBottom="32dp" />
 
         <!-- Email/Username Input -->
@@ -50,7 +50,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            android:hint="Email or Username"/>
+            android:hint="Email or Username">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/emailInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textEmailAddress" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Password Input -->
         <com.google.android.material.textfield.TextInputLayout
@@ -74,7 +81,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Forgot Password?"
-            android:textColor="?attr/colorPrimary"
+            android:textColor="@color/purple_700"
             android:layout_gravity="end"
             android:paddingTop="8dp"
             android:paddingBottom="16dp"
@@ -83,7 +90,6 @@
             android:background="?attr/selectableItemBackground" />
 
         <!-- Login Button -->
-
         <com.google.android.material.button.MaterialButton
             android:id="@+id/loginBtn"
             android:layout_width="match_parent"
@@ -92,7 +98,9 @@
             android:paddingTop="12dp"
             android:paddingBottom="12dp"
             android:text="Login"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:backgroundTint="@color/purple_700"
+            android:textColor="@android:color/white" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/registerBtn"
@@ -101,8 +109,10 @@
             android:layout_marginTop="16dp"
             android:paddingTop="12dp"
             android:paddingBottom="12dp"
-            android:text="register"
-            android:textSize="16sp" />
+            android:text="Register"
+            android:textSize="16sp"
+            android:backgroundTint="@color/teal_700"
+            android:textColor="@android:color/white" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -116,14 +126,14 @@
                 android:layout_height="wrap_content"
                 android:text="Don't have an account?"
                 android:textSize="14sp"
-                android:textColor="?attr/colorOnSurfaceVariant" />
+                android:textColor="@android:color/darker_gray" />
 
             <TextView
                 android:id="@+id/signUpText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Sign Up"
-                android:textColor="?attr/colorPrimary"
+                android:textColor="@color/purple_700"
                 android:textStyle="bold"
                 android:textSize="14sp"
                 android:layout_marginStart="4dp"
@@ -132,7 +142,5 @@
                 android:focusable="true"
                 android:background="?attr/selectableItemBackground" />
         </LinearLayout>
-
     </LinearLayout>
-
 </RelativeLayout>
