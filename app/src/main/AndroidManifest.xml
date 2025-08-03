@@ -26,6 +26,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PaisaCheck360">
 
+
+        <activity android:name=".SmsDetectionActivity" />
+        <activity android:name=".FraudLinkDetectionActivity" />
+        <activity android:name=".FraudCallDetectionActivity" />
+        <activity android:name=".OCRScannerActivity" />
+
+
         <!-- ✅ Login Activity (Launcher) -->
         <activity
             android:name=".LoginActivity"
