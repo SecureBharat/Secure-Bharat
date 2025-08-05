@@ -37,6 +37,17 @@ android {
 }
 
 dependencies {
+    implementation("com.google.android.material:material:1.11.0")
+
+    // OkHttp – for networking
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+// Coroutines – for async code
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+
+
+
     // ✅ Firebase BoM – controls all versions
     implementation(platform("com.google.firebase:firebase-bom:32.7.3"))
 

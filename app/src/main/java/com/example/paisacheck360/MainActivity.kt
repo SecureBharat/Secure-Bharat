@@ -1,128 +1,179 @@
 package com.example.paisacheck360
 
-import android.Manifest
-import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import com.google.firebase.database.FirebaseDatabase
-import java.security.MessageDigest
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.app.ActivityCompat
+import com.example.paisacheck360.ScamPopupService
+
 
 class MainActivity : AppCompatActivity() {
 
-    private val SMS_PERMISSION_CODE = 100
-    private val OVERLAY_PERMISSION_CODE = 101
+    private lateinit var statusText: TextView
+    private lateinit var enableNotificationBtn: Button
+    private lateinit var enableOverlayBtn: Button
+    private lateinit var testBtn: Button
+
+    companion object {
+        private const val NOTIFICATION_PERMISSION_REQUEST = 1001
+        private const val OVERLAY_PERMISSION_REQUEST = 1002
+        private const val SMS_PERMISSION_REQUEST = 1003
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        checkAndRequestPermissions()
-        checkNotificationAccessPermission(this)
-
-        // 🔐 Firebase Secure Login Logic (Android ID + Hashed Password)
-        val androidID = getAndroidID()
-        val password = "123456" // Replace later with EditText input
-        val hashedPassword = hashPassword(password)
-
-
-        // 🟩 Attach click listeners to navigation TextViews
-        findViewById<TextView>(R.id.sms).setOnClickListener {
-            startActivity(Intent(this, SmsDetectionActivity::class.java))
-        }
-
-        findViewById<TextView>(R.id.link).setOnClickListener {
-            startActivity(Intent(this, FraudLinkDetectionActivity::class.java))
-        }
-
-        findViewById<TextView>(R.id.call).setOnClickListener {
-            startActivity(Intent(this, FraudCallDetectionActivity::class.java))
-        }
-
-        findViewById<TextView>(R.id.ocr).setOnClickListener {
-            startActivity(Intent(this, OCRScannerActivity::class.java))
-        }
-
-
-        val db = FirebaseDatabase.getInstance().reference
-        db.child("users").child(androidID).child("password").setValue(hashedPassword)
-            .addOnSuccessListener {
-                Toast.makeText(this, "✅ User saved securely", Toast.LENGTH_SHORT).show()
-            }
-            .addOnFailureListener {
-                Toast.makeText(this, "❌ Failed to save user", Toast.LENGTH_LONG).show()
-            }
+        initViews()
+        setupClickListeners()
+        updateStatus()
     }
 
-    private fun getAndroidID(): String {
-        return Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+    private fun initViews() {
+        statusText = findViewById(R.id.statusText)
+        enableNotificationBtn = findViewById(R.id.enableNotificationBtn)
+        enableOverlayBtn = findViewById(R.id.enableOverlayBtn)
+        testBtn = findViewById(R.id.testBtn)
     }
 
-    private fun hashPassword(password: String): String {
-        val digest = MessageDigest.getInstance("SHA-256")
-        val result = digest.digest(password.toByteArray())
-        return result.joinToString("") { "%02x".format(it) }
-    }
-
-    private fun checkAndRequestPermissions() {
-        var permissionMessage = ""
-
-        // SMS Permissions
-        if (!hasSMSPermissions()) {
-            requestSMSPermissions()
-            permissionMessage += "Requesting SMS permissions...\n"
-        } else {
-            permissionMessage += "✅ SMS permissions already granted\n"
+    private fun setupClickListeners() {
+        enableNotificationBtn.setOnClickListener {
+            requestNotificationAccess()
         }
 
-        // Overlay Permission
-        if (!canDrawOverlays()) {
+        enableOverlayBtn.setOnClickListener {
             requestOverlayPermission()
-            permissionMessage += "Requesting overlay permission...\n"
-        } else {
-            permissionMessage += "✅ Overlay permission already granted\n"
         }
 
-        Toast.makeText(this, permissionMessage.trim(), Toast.LENGTH_LONG).show()
+        testBtn.setOnClickListener {
+            testScamDetection()
+        }
     }
 
-    private fun hasSMSPermissions(): Boolean {
-        return ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) == PackageManager.PERMISSION_GRANTED
+    override fun onResume() {
+        super.onResume()
+        updateStatus()
     }
 
-    private fun requestSMSPermissions() {
+    private fun updateStatus() {
+        val notificationEnabled = isNotificationAccessEnabled()
+        val overlayEnabled = isOverlayPermissionGranted()
+        val smsEnabled = isSMSPermissionGranted()
+
+        val status = buildString {
+            appendLine("App Status:")
+            appendLine("✓ Notification Access: ${if (notificationEnabled) "Enabled" else "Disabled"}")
+            appendLine("✓ Overlay Permission: ${if (overlayEnabled) "Enabled" else "Disabled"}")
+            appendLine("✓ SMS Permission: ${if (smsEnabled) "Enabled" else "Disabled"}")
+            appendLine()
+            if (notificationEnabled && overlayEnabled && smsEnabled) {
+                appendLine("🟢 All permissions granted! Scam detection is active.")
+            } else {
+                appendLine("🔴 Please enable all permissions for the app to work.")
+            }
+        }
+
+        statusText.text = status
+
+        // Update button states
+        enableNotificationBtn.isEnabled = !notificationEnabled
+        enableOverlayBtn.isEnabled = !overlayEnabled
+
+        // Request SMS permission if not granted
+        if (!smsEnabled) {
+            requestSMSPermission()
+        }
+    }
+
+    private fun isNotificationAccessEnabled(): Boolean {
+        val enabledPackages = NotificationManagerCompat.getEnabledListenerPackages(this)
+        return enabledPackages.contains(packageName)
+    }
+
+    private fun isOverlayPermissionGranted(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            Settings.canDrawOverlays(this)
+        } else {
+            true
+        }
+    }
+
+    private fun isSMSPermissionGranted(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.RECEIVE_SMS
+        ) == PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.READ_SMS
+                ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun requestNotificationAccess() {
+        val intent = Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS")
+        startActivityForResult(intent, NOTIFICATION_PERMISSION_REQUEST)
+        Toast.makeText(
+            this,
+            "Please enable 'Secure Bharat' in the notification access settings",
+            Toast.LENGTH_LONG
+        ).show()
+    }
+
+    private fun requestOverlayPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val intent = Intent(
+                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                Uri.parse("package:$packageName")
+            )
+            startActivityForResult(intent, OVERLAY_PERMISSION_REQUEST)
+        }
+    }
+
+    private fun requestSMSPermission() {
         ActivityCompat.requestPermissions(
             this,
             arrayOf(
                 Manifest.permission.RECEIVE_SMS,
                 Manifest.permission.READ_SMS
             ),
-            SMS_PERMISSION_CODE
+            SMS_PERMISSION_REQUEST
         )
     }
 
-    private fun canDrawOverlays(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Settings.canDrawOverlays(this)
-        } else true
-    }
+    private fun testScamDetection() {
+        if (!isNotificationAccessEnabled() || !isOverlayPermissionGranted()) {
+            Toast.makeText(this, "Please enable all permissions first", Toast.LENGTH_SHORT).show()
+            return
+        }
 
-    private fun requestOverlayPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
-            val intent = Intent(
-                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                Uri.parse("package:$packageName")
-            )
-            startActivityForResult(intent, OVERLAY_PERMISSION_CODE)
+        // Test with a sample scam message
+        val testMessage = "Congratulations! You've won ₹50,000. Click here to claim: http://fake-link.com"
+
+        Toast.makeText(this, "Testing scam detection with sample message...", Toast.LENGTH_SHORT).show()
+
+        // Simulate scam detection (you can remove this in production)
+        val intent = Intent(this, com.example.paisacheck360.ScamPopupService::class.java)
+        intent.putExtra("message", testMessage)
+        intent.putExtra("isTest", true)
+
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(intent)
+            } else {
+                startService(intent)
+            }
+        } catch (e: Exception) {
+            Toast.makeText(this, "Error starting service: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -133,39 +184,21 @@ class MainActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        if (requestCode == SMS_PERMISSION_CODE) {
-            if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
-                Toast.makeText(this, "✅ SMS permissions granted", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "❌ SMS permissions denied", Toast.LENGTH_LONG).show()
+        when (requestCode) {
+            SMS_PERMISSION_REQUEST -> {
+                if (grantResults.isNotEmpty() &&
+                    grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
+                    Toast.makeText(this, "SMS permissions granted", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "SMS permissions are required for the app to work", Toast.LENGTH_LONG).show()
+                }
+                updateStatus()
             }
         }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == OVERLAY_PERMISSION_CODE) {
-            if (canDrawOverlays()) {
-                Toast.makeText(this, "✅ Overlay permission granted", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "❌ Overlay permission denied", Toast.LENGTH_LONG).show()
-            }
-        }
-    }
-}
-
-// 🔔 Notification Access Helper Function
-fun checkNotificationAccessPermission(context: Context) {
-    val listeners = Settings.Secure.getString(
-        context.contentResolver,
-        "enabled_notification_listeners"
-    )
-
-    if (listeners == null || !listeners.contains(context.packageName)) {
-        Toast.makeText(context, "Please enable Notification Access", Toast.LENGTH_LONG).show()
-        val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(intent)
+        updateStatus()
     }
 }
