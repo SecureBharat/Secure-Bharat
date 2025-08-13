@@ -87,8 +87,8 @@
             android:text="LOGIN"
             android:textAllCaps="true"
             android:textStyle="bold"
-            android:textColor="#FFFFFF"
-            android:background="@drawable/yellow_button_bg"
+            android:textColor="#FFC107"
+            android:background="@drawable/rounded_button_outline"
             android:layout_marginBottom="10dp" />
 
         <!-- Register Button (Yellow Outline) -->
