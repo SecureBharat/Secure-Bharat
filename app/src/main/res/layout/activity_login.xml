@@ -15,14 +15,15 @@
         android:gravity="center_horizontal">
 
         <!-- App Logo or Title -->
+
+
         <ImageView
             android:id="@+id/loginLogo"
-            android:layout_width="96dp"
-            android:layout_height="96dp"
-            android:src="@drawable/ic_launcher_foreground"
-            android:contentDescription="App Logo"
+            android:layout_width="120dp"
+            android:layout_height="111dp"
             android:layout_marginBottom="32dp"
-            app:tint="@color/purple_700" />
+            android:contentDescription="App Logo"
+            android:src="@drawable/ic_launcher_foreground" />
 
         <TextView
             android:id="@+id/loginTitle"
