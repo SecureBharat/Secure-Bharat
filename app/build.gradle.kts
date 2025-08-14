@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("com.google.gms.google-services") version "4.4.3"
+    id("org.jetbrains.kotlin.kapt") // Add this line
 }
 
 android {
@@ -37,6 +38,16 @@ android {
 }
 
 dependencies {
+
+
+
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
+    kapt ("com.github.bumptech.glide:compiler:4.16.0")
+
+
+
+    implementation("com.pierfrancescosoffritti.androidyoutubeplayer:core:12.1.0")
+
     implementation("com.google.android.material:material:1.11.0")
 
     // OkHttp – for networking
