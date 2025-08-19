@@ -28,6 +28,7 @@
         android:theme="@style/Theme.Material3.DayNight.NoActionBar"
         tools:targetApi="31">
 
+
         <!-- ✅ Login Activity is now Launcher -->
         <activity
             android:name=".LoginActivity"
@@ -45,6 +46,12 @@
             android:exported="true"
             android:theme="@style/Theme.PaisaCheck360"
             tools:ignore="MissingClass" />
+
+        <!-- ✅ Sms Summary Activity (added) -->
+        <activity
+            android:name=".SmsSummaryActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
 
         <!-- ✅ Notification Listener Service -->
         <service
@@ -68,6 +75,8 @@
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="scam_detection" />
         </service>
+
+
 
     </application>
 
