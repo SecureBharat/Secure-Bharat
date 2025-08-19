@@ -1,160 +1,136 @@
 package com.example.paisacheck360
 
-import android.app.Notification
-import android.content.Intent
-import android.os.Build
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
-import kotlinx.coroutines.*
-import okhttp3.*
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.RequestBody.Companion.toRequestBody
-import org.json.JSONObject
-import java.io.IOException
-import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import java.net.URLEncoder
+import java.text.SimpleDateFormat
+import java.util.*
+import android.content.Intent
+
 
 class SMSNotificationListener : NotificationListenerService() {
 
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    private val client = OkHttpClient.Builder()
-        .connectTimeout(10, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
-        .build()
+    private val client = OkHttpClient()
+    private val gson = Gson()
+    private val TAG = "SMSNotification"
 
-    companion object {
-        private const val TAG = "SMSNotificationListener"
-        private const val API_URL = "https://backend-k0ri.onrender.com/predict"
-    }
+    override fun onNotificationPosted(sbn: StatusBarNotification) {
+        val pkg = sbn.packageName ?: return
+        val extras = sbn.notification.extras
+        val title = extras.getString("android.title") ?: ""
+        val text = extras.getCharSequence("android.text")?.toString() ?: ""
 
-    override fun onCreate() {
-        super.onCreate()
-        Log.d(TAG, "🟢 Service created")
-    }
+        // Filter for real SMS apps only (extend as needed)
+        val smsApps = listOf(
+            "com.google.android.apps.messaging", // Google Messages
+            "com.android.mms",                   // AOSP
+            "com.samsung.android.messaging",     // Samsung
+            "com.miui.sms",                      // Xiaomi
+            "com.oneplus.mms"                    // OnePlus
+        )
 
-    override fun onDestroy() {
-        super.onDestroy()
-        scope.cancel()
-        Log.d(TAG, "🔴 Service destroyed")
-    }
+        if (!smsApps.contains(pkg)) return
 
-    override fun onNotificationPosted(sbn: StatusBarNotification?) {
-        sbn ?: return
+        Log.d(TAG, "📩 SMS notif from [$title]: $text")
 
-        val packageName = sbn.packageName
-        val message = extractMessageText(sbn) ?: return
-        val sender = extractSenderInfo(sbn)
-
-        // Filter: only SMS-like apps + meaningful text
-        if (!isSMSLikeApp(packageName)) return
-        if (message.isBlank() || message.length < 10) return
-
-        Log.d(TAG, "📩 SMS Notification from $packageName: $message")
-
-        scope.launch {
-            checkWithAPI(message, sender)
+        CoroutineScope(Dispatchers.IO).launch {
+            checkWithAPI(title, text)
         }
     }
 
-    private fun extractMessageText(sbn: StatusBarNotification): String? {
-        val extras = sbn.notification.extras
-        return extras.getCharSequence(Notification.EXTRA_TEXT)?.toString()
-            ?: extras.getCharSequence(Notification.EXTRA_BIG_TEXT)?.toString()
-            ?: extras.getCharSequence(Notification.EXTRA_SUMMARY_TEXT)?.toString()
-            ?: extras.getCharSequence(Notification.EXTRA_TITLE)?.toString()
-    }
-
-    private fun extractSenderInfo(sbn: StatusBarNotification): String {
-        val extras = sbn.notification.extras
-        return extras.getCharSequence(Notification.EXTRA_TITLE)?.toString()
-            ?: extras.getCharSequence(Notification.EXTRA_TITLE_BIG)?.toString()
-            ?: "Unknown Sender"
-    }
-
-    private fun isSMSLikeApp(pkg: String): Boolean {
-        val smsApps = listOf(
-            "com.google.android.apps.messaging",
-            "com.samsung.android.messaging",
-            "com.android.mms",
-            "com.android.messaging",
-            "com.sonyericsson.conversations",
-        )
-        return smsApps.any { pkg.contains(it, ignoreCase = true) }
-    }
-
-    private suspend fun checkWithAPI(message: String, sender: String) {
+    private suspend fun checkWithAPI(sender: String, message: String) {
         try {
-            val json = JSONObject().apply {
-                put("message", message)
-            }
-
-            val requestBody = json.toString().toRequestBody("application/json".toMediaType())
-            val request = Request.Builder()
-                .url(API_URL)
-                .post(requestBody)
-                .addHeader("Content-Type", "application/json")
-                .build()
-
+            val encoded = URLEncoder.encode(message, "UTF-8")
+            val url = "https://backend-k0ri.onrender.com/predict?text=$encoded"
+            val request = Request.Builder().url(url).build()
             val response = client.newCall(request).execute()
-            val responseBody = response.body?.string()
+            val body = response.body?.string().orEmpty()
 
-            val isScam = if (response.isSuccessful && responseBody != null) {
-                val obj = JSONObject(responseBody)
-                obj.optBoolean("is_scam", false).also {
-                    Log.d(TAG, "🤖 API Prediction Result: $it")
-                }
-            } else {
-                false
-            }
+            // API returns { "label": "spam" | "ham", ... } (assumed)
+            val isScam = body.contains("\"spam\"", ignoreCase = true)
 
-            if (isScam || containsScamKeywords(message)) {
-                Log.d(TAG, "🚨 Scam Detected: $message")
+            val hitByKeywords = containsScamKeywords(message)
+            if (isScam || hitByKeywords) {
+                val risk = if (containsHighRiskKeywords(message)) "High" else "Medium"
+                Log.d(TAG, "🚨 Scam Detected. Risk=$risk | $message")
+
+                // Save locally (single key used everywhere: "scam_logs")
+                saveScamToLocal(sender, message, risk)
+
                 withContext(Dispatchers.Main) {
                     triggerScamAlert(message, sender)
                 }
             } else {
-                Log.d(TAG, "✅ Not a scam")
+                Log.d(TAG, "✅ Looks safe (API+keywords).")
             }
-
         } catch (e: Exception) {
-            Log.e(TAG, "❌ API Error", e)
-
-            // fallback keyword check
-            if (containsScamKeywords(message)) {
-                Log.w(TAG, "⚠️ Fallback keyword scam match")
-                withContext(Dispatchers.Main) {
-                    triggerScamAlert(message, sender)
-                }
+            Log.e(TAG, "API check failed: ${e.message}. Falling back to keywords.")
+            val risk = when {
+                containsHighRiskKeywords(message) -> "High"
+                containsScamKeywords(message) -> "Medium"
+                else -> null
+            }
+            if (risk != null) {
+                saveScamToLocal(sender, message, risk)
+                withContext(Dispatchers.Main) { triggerScamAlert(message, sender) }
             }
         }
     }
 
     private fun containsScamKeywords(text: String): Boolean {
         val keywords = listOf(
-            "won", "free", "prize", "lottery", "urgent", "verify", "click", "claim", "refund",
-            "blocked", "password", "credit", "debit", "account", "gift", "reward"
+            "lottery", "winner", "loan", "kyc", "otp", "blocked",
+            "verify", "urgent", "click link", "update account"
         )
+        return keywords.any { text.contains(it, ignoreCase = true) }
+    }
+
+    private fun containsHighRiskKeywords(text: String): Boolean {
+        val risky = listOf("password", "account blocked", "verify kyc", "urgent action", "otp now")
         val lower = text.lowercase()
-        return keywords.count { lower.contains(it) } >= 2
+        return risky.any { lower.contains(it) }
+    }
+
+    /**
+     * APPENDS to SharedPreferences("SecureBharatPrefs") key "scam_logs" using Gson.
+     * Structure matches ScamMessage.kt exactly.
+     */
+    private fun saveScamToLocal(sender: String, message: String, risk: String) {
+        val prefs = getSharedPreferences("SecureBharatPrefs", MODE_PRIVATE)
+        val existingJson = prefs.getString("scam_logs", "[]")
+
+        val type = object : TypeToken<MutableList<ScamMessage>>() {}.type
+        val list: MutableList<ScamMessage> = try {
+            gson.fromJson(existingJson, type) ?: mutableListOf()
+        } catch (_: Exception) {
+            mutableListOf()
+        }
+
+        val now = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date())
+        list.add(ScamMessage(sender = sender, text = message, date = now, riskLevel = risk))
+
+        prefs.edit().putString("scam_logs", gson.toJson(list)).apply()
+        Log.d(TAG, "💾 Saved scam. Total=${list.size}")
     }
 
     private fun triggerScamAlert(message: String, sender: String) {
-        try {
-            val intent = Intent(this, ScamPopupService::class.java).apply {
-                putExtra("message", message)
-                putExtra("sender", sender)
-                putExtra("timestamp", System.currentTimeMillis())
-            }
+        Log.d(TAG, "⚠️ Scam Alert popup -> from $sender")
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(intent)
-            } else {
-                startService(intent)
-            }
-
-            Log.d(TAG, "🔔 Scam popup triggered")
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to start ScamPopupService", e)
+        val intent = Intent(this, ScamPopupService::class.java).apply {
+            putExtra("sender", sender)
+            putExtra("message", message)
         }
+        // Needed for service call from NotificationListener
+        startService(intent)
     }
+
 }

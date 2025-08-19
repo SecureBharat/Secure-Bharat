@@ -28,6 +28,7 @@
         android:theme="@style/Theme.Material3.DayNight.NoActionBar"
         tools:targetApi="31">
 
+
         <!-- ✅ Login Activity is now Launcher -->
         <activity
             android:name=".LoginActivity"
@@ -50,7 +51,7 @@
         <activity
             android:name=".SmsSummaryActivity"
             android:exported="true"
-            android:label="SMS Scam Summary" />
+            android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
 
         <!-- ✅ Notification Listener Service -->
         <service
@@ -74,6 +75,8 @@
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="scam_detection" />
         </service>
+
+
 
     </application>
 
