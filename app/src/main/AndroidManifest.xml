@@ -46,6 +46,12 @@
             android:theme="@style/Theme.PaisaCheck360"
             tools:ignore="MissingClass" />
 
+        <!-- ✅ Sms Summary Activity (added) -->
+        <activity
+            android:name=".SmsSummaryActivity"
+            android:exported="true"
+            android:label="SMS Scam Summary" />
+
         <!-- ✅ Notification Listener Service -->
         <service
             android:name=".SMSNotificationListener"

@@ -174,16 +174,14 @@ class MainActivity : AppCompatActivity() {
         val smsCount = prefs.getInt("sms_scam_count", 0)
         val upiCount = prefs.getInt("upi_scam_count", 0)
 
-        val message = "📊 SECURITY REPORT\n\n" +
-                "🛡️ Total Threats Blocked: $scamCount\n" +
-                "📧 SMS Scams Stopped: $smsCount\n" +
-                "💳 UPI Frauds Flagged: $upiCount\n" +
-                "🔗 Links Verified: ${scamCount * 2}\n\n" +
-                "✅ Your device is secure!\n" +
-                "🇮🇳 Keep India safe from digital fraud!"
-
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        // 🔹 Open SmsSummaryActivity with real values
+        val intent = Intent(this, SmsSummaryActivity::class.java)
+        intent.putExtra("scannedCount", smsCount)   // total scanned SMS
+        intent.putExtra("flaggedCount", scamCount)  // total scams flagged
+        intent.putExtra("upiCount", upiCount)       // total UPI scams
+        startActivity(intent)
     }
+
 
     override fun onResume() {
         super.onResume()
