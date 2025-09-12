@@ -53,6 +53,14 @@
             android:exported="true"
             android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
 
+
+<!--call activivty-->
+        <activity
+            android:name=".FraudCallSummaryActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Material3.DayNight.NoActionBar"/>
+
+
         <!-- ✅ Notification Listener Service -->
         <service
             android:name=".SMSNotificationListener"

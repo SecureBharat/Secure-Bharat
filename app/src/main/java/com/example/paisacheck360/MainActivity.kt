@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         fraudNumberLookupBtn.setOnClickListener {
-            Toast.makeText(this, "📞 Fraud Lookup - Coming Soon!", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, FraudCallSummaryActivity::class.java))
         }
 
         ocrScannerBtn.setOnClickListener {
