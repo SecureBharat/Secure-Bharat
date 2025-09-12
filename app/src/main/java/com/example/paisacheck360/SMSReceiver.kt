@@ -36,8 +36,17 @@ class SMSReceiver : BroadcastReceiver() {
             ) {
                 val result = response.body()
                 if (result != null && result.label.equals("scam", ignoreCase = true)) {
+
+                    // Save scam to SharedPreferences
+                    saveScamMessage(context, "SMS", message, System.currentTimeMillis())
+
+                    // Notify UI
+                    context.sendBroadcast(Intent("com.example.paisacheck360.SCAM_DATA_UPDATED"))
+
+                    // Show notification
                     showScamNotification(context, message)
 
+                    // Show alert popup
                     val alertIntent = Intent(context, ScamPopupService::class.java)
                     alertIntent.putExtra("sms_body", message)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -54,6 +63,16 @@ class SMSReceiver : BroadcastReceiver() {
                 Toast.makeText(context, "API call failed: ${t.localizedMessage}", Toast.LENGTH_SHORT).show()
             }
         })
+    }
+
+    private fun saveScamMessage(context: Context, type: String, text: String, timestamp: Long) {
+        val prefs = context.getSharedPreferences("SecureBharatPrefs", Context.MODE_PRIVATE)
+        val existing = prefs.getStringSet("fraud_messages", mutableSetOf())?.toMutableSet() ?: mutableSetOf()
+
+        // Format: type|text|timestamp
+        existing.add("$type|$text|$timestamp")
+
+        prefs.edit().putStringSet("fraud_messages", existing).apply()
     }
 
     private fun showScamNotification(context: Context, message: String) {
