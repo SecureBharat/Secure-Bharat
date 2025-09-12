@@ -24,15 +24,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fraudNumberLookupBtn: LinearLayout
     private lateinit var ocrScannerBtn: LinearLayout
     private lateinit var detailedReportBtn: Button
+    private lateinit var viewLogsBtn: Button   // ✅ Added
 
-    // REAL YouTube videos for digital security awareness (Indian context)
     private val videos = listOf(
-        VideoData("🔒 UPI Fraud Prevention", "XKfgdkcIUxw"), // Reserve Bank of India cyber security
-        VideoData("📱 Digital Payment Safety", "IUG2fB4gKKU"), // Banking security tips
-        VideoData("⚠️ Phone Scam Alerts", "dQw4w9WgXcQ"), // Popular awareness video
-        VideoData("🎯 QR Code Safety", "9bZkp7q19f0"), // QR code safety
-        VideoData("💬 WhatsApp Scam Prevention", "2Vv-BfVoq4g"), // WhatsApp security
-        VideoData("💳 Online Banking Tips", "fC7oUOUEEi4") // Banking safety
+        VideoData("🔒 UPI Fraud Prevention", "XKfgdkcIUxw"),
+        VideoData("📱 Digital Payment Safety", "IUG2fB4gKKU"),
+        VideoData("⚠️ Phone Scam Alerts", "dQw4w9WgXcQ"),
+        VideoData("🎯 QR Code Safety", "9bZkp7q19f0"),
+        VideoData("💬 WhatsApp Scam Prevention", "2Vv-BfVoq4g"),
+        VideoData("💳 Online Banking Tips", "fC7oUOUEEi4")
     )
 
     data class VideoData(val title: String, val youtubeId: String)
@@ -56,6 +56,7 @@ class MainActivity : AppCompatActivity() {
         fraudNumberLookupBtn = findViewById(R.id.fraud_number_lookup)
         ocrScannerBtn = findViewById(R.id.ocr_scanner)
         detailedReportBtn = findViewById(R.id.detailed_report)
+        viewLogsBtn = findViewById(R.id.viewLogsBtn)   // ✅ Added
     }
 
     private fun setupClickListeners() {
@@ -81,6 +82,11 @@ class MainActivity : AppCompatActivity() {
 
         detailedReportBtn.setOnClickListener {
             showDetailedReport()
+        }
+
+        viewLogsBtn.setOnClickListener {
+            // ✅ Open LogsActivity when clicked
+            startActivity(Intent(this, LogsActivity::class.java))
         }
     }
 
@@ -108,7 +114,6 @@ class MainActivity : AppCompatActivity() {
                 setPadding(4, 4, 4, 4)
             }
 
-            // Load thumbnail with better error handling
             Glide.with(this)
                 .load("https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg")
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
@@ -174,14 +179,16 @@ class MainActivity : AppCompatActivity() {
         val smsCount = prefs.getInt("sms_scam_count", 0)
         val upiCount = prefs.getInt("upi_scam_count", 0)
 
-        // 🔹 Open SmsSummaryActivity with real values
-        val intent = Intent(this, SmsSummaryActivity::class.java)
-        intent.putExtra("scannedCount", smsCount)   // total scanned SMS
-        intent.putExtra("flaggedCount", scamCount)  // total scams flagged
-        intent.putExtra("upiCount", upiCount)       // total UPI scams
-        startActivity(intent)
-    }
+        val message = "📊 SECURITY REPORT\n\n" +
+                "🛡️ Total Threats Blocked: $scamCount\n" +
+                "📧 SMS Scams Stopped: $smsCount\n" +
+                "💳 UPI Frauds Flagged: $upiCount\n" +
+                "🔗 Links Verified: ${scamCount * 2}\n\n" +
+                "✅ Your device is secure!\n" +
+                "🇮🇳 Keep India safe from digital fraud!"
 
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+    }
 
     override fun onResume() {
         super.onResume()

@@ -358,6 +358,20 @@
                 android:textSize="14sp"
                 android:elevation="2dp" />
 
+            <!-- New Button: View Scam Logs -->
+            <Button
+                android:id="@+id/viewLogsBtn"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="12dp"
+                android:backgroundTint="#3F51B5"
+                android:text="📜 View Scam Logs"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:elevation="2dp" />
+
+
         </LinearLayout>
 
         <!-- Footer -->
@@ -366,6 +380,16 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:padding="16dp">
+
+            <TextView
+                android:id="@+id/scam_latest_headline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Latest scam: None"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:paddingBottom="4dp"/>
+
 
             <TextView
                 android:layout_width="wrap_content"
