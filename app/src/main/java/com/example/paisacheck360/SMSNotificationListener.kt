@@ -88,11 +88,38 @@ class SMSNotificationListener : NotificationListenerService() {
 
     private fun containsScamKeywords(text: String): Boolean {
         val keywords = listOf(
-            "lottery", "winner", "loan", "kyc", "otp", "blocked",
-            "verify", "urgent", "click link", "update account"
+            // Money & Prize scams
+            "lottery", "winner", "congratulations", "you won", "reward", "bonus", "prize",
+
+            // Loan & KYC scams
+            "loan", "instant loan", "personal loan", "low interest", "kyc", "account update", "update account",
+
+            // OTP / Verification scams
+            "otp", "one time password", "verify", "verification", "secure code", "blocked", "account blocked",
+
+            // Urgency & Threats
+            "urgent", "immediately", "final warning", "suspend", "deactivate", "limited time", "act now",
+
+            // Links & Clickbait
+            "click link", "tap link", "shorturl", "bit.ly", "tinyurl", "http://", "https://",
+
+            // Bank & UPI fraud
+            "bank", "ifsc", "upi", "gpay", "phonepe", "paytm", "yono", "sbi", "icici", "hdfc", "axis",
+            "upi id", "money transfer", "refund", "claim now",
+
+            // Government / Fake job scams
+            "income tax", "pf refund", "govt scheme", "job offer", "work from home", "earn money fast",
+
+            // Crypto / Investment scams
+            "crypto", "bitcoin", "forex", "trading", "investment", "double your money",
+
+            // Generic fraud words
+            "scam", "fraud", "suspicious", "free gift", "scratch card", "lucky draw"
         )
+
         return keywords.any { text.contains(it, ignoreCase = true) }
     }
+
 
     private fun containsHighRiskKeywords(text: String): Boolean {
         val risky = listOf("password", "account blocked", "verify kyc", "urgent action", "otp now")
