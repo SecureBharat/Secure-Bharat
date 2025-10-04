@@ -22,9 +22,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var scanUpiBtn: LinearLayout
     private lateinit var checkLinkBtn: LinearLayout
     private lateinit var fraudNumberLookupBtn: LinearLayout
-    private lateinit var ocrScannerBtn: LinearLayout
+    private lateinit var ocrScannerBtn: LinearLayout   // ✅ OCR Scanner Button
     private lateinit var detailedReportBtn: Button
-    private lateinit var viewLogsBtn: Button   // ✅ Added
+    private lateinit var viewLogsBtn: Button           // ✅ Logs button
 
     private val videos = listOf(
         VideoData("🔒 UPI Fraud Prevention", "XKfgdkcIUxw"),
@@ -56,7 +56,7 @@ class MainActivity : AppCompatActivity() {
         fraudNumberLookupBtn = findViewById(R.id.fraud_number_lookup)
         ocrScannerBtn = findViewById(R.id.ocr_scanner)
         detailedReportBtn = findViewById(R.id.detailed_report)
-        viewLogsBtn = findViewById(R.id.viewLogsBtn)   // ✅ Added
+        viewLogsBtn = findViewById(R.id.viewLogsBtn)
     }
 
     private fun setupClickListeners() {
@@ -65,11 +65,15 @@ class MainActivity : AppCompatActivity() {
         }
 
         scanUpiBtn.setOnClickListener {
-            Toast.makeText(this, "🔍 UPI Scanner - Coming Soon!", Toast.LENGTH_SHORT).show()
+            // ✅ Launch QR scanner directly
+            startActivity(Intent(this, QRScannerActivity::class.java))
         }
 
         checkLinkBtn.setOnClickListener {
-            Toast.makeText(this, "🔗 Link Checker - Coming Soon!", Toast.LENGTH_SHORT).show()
+            // ✅ Open link phishing checker activity
+            startActivity(Intent(this, PhishCheckActivity::class.java).apply {
+                putExtra("scanned", "https://example.com") // placeholder or scanned link
+            })
         }
 
         fraudNumberLookupBtn.setOnClickListener {
@@ -77,7 +81,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         ocrScannerBtn.setOnClickListener {
-            Toast.makeText(this, "📱 OCR Scanner - Coming Soon!", Toast.LENGTH_SHORT).show()
+            // ✅ Launch OCR / QR Scanner Activity
+            startActivity(Intent(this, QRScannerActivity::class.java))
         }
 
         detailedReportBtn.setOnClickListener {
@@ -85,7 +90,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         viewLogsBtn.setOnClickListener {
-            // ✅ Open LogsActivity when clicked
             startActivity(Intent(this, LogsActivity::class.java))
         }
     }
