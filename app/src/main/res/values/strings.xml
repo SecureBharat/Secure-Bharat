@@ -1,19 +1,12 @@
 <resources>
     <string name="app_name">Secure Bharat</string>
+    <string-array name="risk_levels">
+        <item>All</item>
+        <item>High</item>
+        <item>Medium</item>
+        <item>Low</item>
+        <item>Suspicious</item>
+        <item>Safe</item>
+    </string-array>
 
-
-        <!-- Add these strings to fix the errors -->
-        <string name="scam_summary_format">Latest scam: %1$s\nLast 7 Days: %2$d blocked | SMS: %3$d | UPI: %4$d</string>
-        <string name="enable_notification_access">Please enable Notification Access</string>
-
-        <!-- Add other strings you might need -->
-        <string name="view_all_videos">View All Videos</string>
-        <string name="scan_upi">Scan UPI</string>
-        <string name="check_link">Check Link</string>
-        <string name="fraud_lookup">Fraud Number Lookup</string>
-        <string name="ocr_scanner">OCR Scanner</string>
-        <string name="detailed_report">Detailed Report</string>
-    <string name="latest_scam_summary">
-        Latest scam: %1$s\nLast 7 Days: %2$d blocked | SMS: %3$d | UPI: %4$d
-    </string>
-    </resources>
+</resources>

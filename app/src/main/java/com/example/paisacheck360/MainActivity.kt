@@ -1,16 +1,18 @@
 package com.example.paisacheck360
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
-import android.widget.Toast
+import android.util.Log
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 
@@ -19,20 +21,20 @@ class MainActivity : AppCompatActivity() {
     private lateinit var videoContainer: LinearLayout
     private lateinit var viewAllVideosBtn: Button
     private lateinit var scamSummaryText: TextView
-    private lateinit var scanUpiBtn: LinearLayout
     private lateinit var checkLinkBtn: LinearLayout
     private lateinit var fraudNumberLookupBtn: LinearLayout
-    private lateinit var ocrScannerBtn: LinearLayout   // ✅ OCR Scanner Button
     private lateinit var detailedReportBtn: Button
-    private lateinit var viewLogsBtn: Button           // ✅ Logs button
+    private lateinit var viewLogsBtn: Button
+    private lateinit var appRiskScannerBtn: LinearLayout
+
+    private val PERMISSIONS_REQUEST_CODE = 101
 
     private val videos = listOf(
-        VideoData("🔒 UPI Fraud Prevention", "XKfgdkcIUxw"),
-        VideoData("📱 Digital Payment Safety", "IUG2fB4gKKU"),
-        VideoData("⚠️ Phone Scam Alerts", "dQw4w9WgXcQ"),
-        VideoData("🎯 QR Code Safety", "9bZkp7q19f0"),
-        VideoData("💬 WhatsApp Scam Prevention", "2Vv-BfVoq4g"),
-        VideoData("💳 Online Banking Tips", "fC7oUOUEEi4")
+        VideoData("UPI Fraud Prevention", "XKfgdkcIUxw"),
+        VideoData("Digital Payment Safety", "IUG2fB4gKKU"),
+        VideoData("Phone Scam Alerts", "dQw4w9WgXcQ"),
+        VideoData("WhatsApp Scam Prevention", "2Vv-BfVoq4g"),
+        VideoData("Online Banking Tips", "fC7oUOUEEi4")
     )
 
     data class VideoData(val title: String, val youtubeId: String)
@@ -43,54 +45,42 @@ class MainActivity : AppCompatActivity() {
 
         initializeViews()
         loadVideos()
-        checkRequiredPermissions()
         setupClickListeners()
+        checkAndRequestPermissions()
     }
 
     private fun initializeViews() {
         videoContainer = findViewById(R.id.videoContainer)
         viewAllVideosBtn = findViewById(R.id.viewAllVideos)
         scamSummaryText = findViewById(R.id.appTitle)
-        scanUpiBtn = findViewById(R.id.scan_upi)
         checkLinkBtn = findViewById(R.id.check_link)
         fraudNumberLookupBtn = findViewById(R.id.fraud_number_lookup)
-        ocrScannerBtn = findViewById(R.id.ocr_scanner)
         detailedReportBtn = findViewById(R.id.detailed_report)
         viewLogsBtn = findViewById(R.id.viewLogsBtn)
+        appRiskScannerBtn = findViewById(R.id.app_risk_scanner)
     }
 
     private fun setupClickListeners() {
-        viewAllVideosBtn.setOnClickListener {
-            openYouTubeSearch()
-        }
-
-        scanUpiBtn.setOnClickListener {
-            // ✅ Launch QR scanner directly
-            startActivity(Intent(this, QRScannerActivity::class.java))
-        }
+        viewAllVideosBtn.setOnClickListener { openYouTubeSearch() }
 
         checkLinkBtn.setOnClickListener {
-            // ✅ Open link phishing checker activity
-            startActivity(Intent(this, PhishCheckActivity::class.java).apply {
-                putExtra("scanned", "https://example.com") // placeholder or scanned link
-            })
+            Toast.makeText(this, "Link Checker - Coming Soon!", Toast.LENGTH_SHORT).show()
         }
 
         fraudNumberLookupBtn.setOnClickListener {
             startActivity(Intent(this, FraudCallSummaryActivity::class.java))
         }
 
-        ocrScannerBtn.setOnClickListener {
-            // ✅ Launch OCR / QR Scanner Activity
-            startActivity(Intent(this, QRScannerActivity::class.java))
-        }
-
-        detailedReportBtn.setOnClickListener {
-            showDetailedReport()
-        }
+        detailedReportBtn.setOnClickListener { showDetailedReport() }
 
         viewLogsBtn.setOnClickListener {
             startActivity(Intent(this, LogsActivity::class.java))
+        }
+
+        appRiskScannerBtn.setOnClickListener {
+            Log.d("MainActivity", "App Risk Scanner clicked")
+            Toast.makeText(this, "Opening App Risk Scanner...", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, AppRiskScannerActivity::class.java))
         }
     }
 
@@ -114,8 +104,6 @@ class MainActivity : AppCompatActivity() {
                     LinearLayout.LayoutParams.MATCH_PARENT, dpToPx(96)
                 )
                 scaleType = ImageView.ScaleType.CENTER_CROP
-                setBackgroundColor(0xFFE8F4FD.toInt())
-                setPadding(4, 4, 4, 4)
             }
 
             Glide.with(this)
@@ -126,9 +114,7 @@ class MainActivity : AppCompatActivity() {
                 .centerCrop()
                 .into(thumbnail)
 
-            thumbnail.setOnClickListener {
-                openYouTubeVideo(video.youtubeId)
-            }
+            thumbnail.setOnClickListener { openYouTubeVideo(video.youtubeId) }
 
             val title = TextView(this).apply {
                 text = video.title
@@ -151,30 +137,16 @@ class MainActivity : AppCompatActivity() {
             youtubeIntent.setPackage("com.google.android.youtube")
             if (youtubeIntent.resolveActivity(packageManager) != null) {
                 startActivity(youtubeIntent)
-                Toast.makeText(this, "🎬 Opening video...", Toast.LENGTH_SHORT).show()
-            } else {
-                throw Exception("YouTube app not found")
-            }
+            } else throw Exception("YouTube app not found")
         } catch (e: Exception) {
-            try {
-                val webIntent = Intent(Intent.ACTION_VIEW,
-                    Uri.parse("https://www.youtube.com/watch?v=$videoId"))
-                startActivity(webIntent)
-            } catch (ex: Exception) {
-                Toast.makeText(this, "❌ Cannot open video", Toast.LENGTH_SHORT).show()
-            }
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.youtube.com/watch?v=$videoId")))
         }
     }
 
     private fun openYouTubeSearch() {
-        try {
-            val intent = Intent(Intent.ACTION_VIEW,
-                Uri.parse("https://www.youtube.com/results?search_query=digital+fraud+prevention+india+cyber+security"))
-            startActivity(intent)
-            Toast.makeText(this, "🎬 Opening security videos...", Toast.LENGTH_SHORT).show()
-        } catch (e: Exception) {
-            Toast.makeText(this, "❌ Cannot open browser", Toast.LENGTH_SHORT).show()
-        }
+        val intent = Intent(Intent.ACTION_VIEW,
+            Uri.parse("https://www.youtube.com/results?search_query=digital+fraud+prevention+india+cyber+security"))
+        startActivity(intent)
     }
 
     private fun showDetailedReport() {
@@ -183,13 +155,17 @@ class MainActivity : AppCompatActivity() {
         val smsCount = prefs.getInt("sms_scam_count", 0)
         val upiCount = prefs.getInt("upi_scam_count", 0)
 
-        val message = "📊 SECURITY REPORT\n\n" +
-                "🛡️ Total Threats Blocked: $scamCount\n" +
-                "📧 SMS Scams Stopped: $smsCount\n" +
-                "💳 UPI Frauds Flagged: $upiCount\n" +
-                "🔗 Links Verified: ${scamCount * 2}\n\n" +
-                "✅ Your device is secure!\n" +
-                "🇮🇳 Keep India safe from digital fraud!"
+        val message = """
+            SECURITY REPORT
+
+            Total Threats Blocked: $scamCount
+            SMS Scams Stopped: $smsCount
+            UPI Frauds Flagged: $upiCount
+            Links Verified: ${scamCount * 2}
+
+            Your device is secure!
+            Keep India safe from digital fraud!
+        """.trimIndent()
 
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
@@ -202,28 +178,42 @@ class MainActivity : AppCompatActivity() {
     private fun updateScamCount() {
         val prefs = getSharedPreferences("SecureBharatPrefs", Context.MODE_PRIVATE)
         val scamCount = prefs.getInt("scam_count", 0)
-        scamSummaryText.text = "🛡️ Secure Bharat — $scamCount threats blocked"
+        scamSummaryText.text = "Secure Bharat — $scamCount threats blocked"
     }
 
-    private fun checkRequiredPermissions() {
-        if (!isNotificationServiceEnabled()) {
-            Toast.makeText(this, "🔔 Enable notifications for real-time protection",
-                Toast.LENGTH_LONG).show()
-            try {
-                startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
-            } catch (e: Exception) {
-                // Settings not available
-            }
+    /** ✅ Combined permission logic from both versions */
+    private fun checkAndRequestPermissions() {
+        val permissionsToRequest = mutableListOf<String>()
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED)
+            permissionsToRequest.add(Manifest.permission.READ_PHONE_STATE)
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED)
+            permissionsToRequest.add(Manifest.permission.READ_CALL_LOG)
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED)
+            permissionsToRequest.add(Manifest.permission.RECEIVE_SMS)
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED)
+            permissionsToRequest.add(Manifest.permission.READ_SMS)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED)
+            permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS)
+
+        if (permissionsToRequest.isNotEmpty()) {
+            ActivityCompat.requestPermissions(this, permissionsToRequest.toTypedArray(), PERMISSIONS_REQUEST_CODE)
         }
 
-        if (!Settings.canDrawOverlays(this)) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
+            val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
+            startActivity(intent)
+        }
+
+        if (!isNotificationServiceEnabled()) {
             try {
-                val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    Uri.parse("package:$packageName"))
-                startActivity(intent)
-            } catch (e: Exception) {
-                // Settings not available
-            }
+                startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+            } catch (_: Exception) { }
         }
     }
 
@@ -231,6 +221,17 @@ class MainActivity : AppCompatActivity() {
         val pkgName = packageName
         val flat = Settings.Secure.getString(contentResolver, "enabled_notification_listeners")
         return flat != null && flat.contains(pkgName)
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == PERMISSIONS_REQUEST_CODE) {
+            grantResults.forEachIndexed { index, result ->
+                if (result == PackageManager.PERMISSION_DENIED) {
+                    Log.w("Permissions", "${permissions[index]} was denied.")
+                }
+            }
+        }
     }
 
     private fun dpToPx(dp: Int): Int {

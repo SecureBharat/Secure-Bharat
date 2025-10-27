@@ -37,7 +37,6 @@
                 android:layout_height="wrap_content"
                 android:text="🇮🇳"
                 android:textSize="20sp" />
-
         </LinearLayout>
 
         <!-- Learn to Stay Safe Section -->
@@ -71,10 +70,8 @@
                     android:layout_height="wrap_content"
                     android:text="🎯"
                     android:textSize="16sp" />
-
             </LinearLayout>
 
-            <!-- Horizontal video list with better styling -->
             <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -90,7 +87,6 @@
                     android:paddingEnd="4dp" />
             </HorizontalScrollView>
 
-            <!-- View All Videos Button -->
             <Button
                 android:id="@+id/viewAllVideos"
                 android:layout_width="match_parent"
@@ -135,7 +131,6 @@
                     android:layout_height="wrap_content"
                     android:text="⚡"
                     android:textSize="16sp" />
-
             </LinearLayout>
 
             <!-- Scan UPI ID Tool -->
@@ -174,7 +169,6 @@
                     android:text="▶"
                     android:textColor="#1565C0"
                     android:textSize="14sp" />
-
             </LinearLayout>
 
             <!-- Check Link Tool -->
@@ -213,7 +207,6 @@
                     android:text="▶"
                     android:textColor="#1565C0"
                     android:textSize="14sp" />
-
             </LinearLayout>
 
             <!-- Fraud Number Lookup -->
@@ -252,37 +245,37 @@
                     android:text="▶"
                     android:textColor="#1565C0"
                     android:textSize="14sp" />
-
             </LinearLayout>
 
-            <!-- OCR Scanner -->
+            <!-- App Risk Scanner -->
             <LinearLayout
-                android:id="@+id/ocr_scanner"
+                android:id="@+id/app_risk_scanner"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
+                android:layout_marginTop="12dp"
                 android:background="@drawable/btn_outline"
+                android:clickable="true"
+                android:elevation="2dp"
+                android:focusable="true"
                 android:gravity="center"
                 android:orientation="horizontal"
-                android:padding="12dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:elevation="2dp">
+                android:padding="12dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginEnd="12dp"
                     android:text="📱"
-                    android:textSize="20sp"
-                    android:layout_marginEnd="12dp" />
+                    android:textSize="20sp" />
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="OCR Scanner"
+                    android:text="App Risk Scanner"
                     android:textColor="#1565C0"
-                    android:textStyle="bold"
-                    android:textSize="16sp" />
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -290,9 +283,7 @@
                     android:text="▶"
                     android:textColor="#1565C0"
                     android:textSize="14sp" />
-
             </LinearLayout>
-
         </LinearLayout>
 
         <!-- Scam Summary Section -->
@@ -326,7 +317,6 @@
                     android:layout_height="wrap_content"
                     android:text="🛡️"
                     android:textSize="16sp" />
-
             </LinearLayout>
 
             <TextView
@@ -358,7 +348,6 @@
                 android:textSize="14sp"
                 android:elevation="2dp" />
 
-            <!-- New Button: View Scam Logs -->
             <Button
                 android:id="@+id/viewLogsBtn"
                 android:layout_width="match_parent"
@@ -370,8 +359,6 @@
                 android:textStyle="bold"
                 android:textSize="14sp"
                 android:elevation="2dp" />
-
-
         </LinearLayout>
 
         <!-- Footer -->
@@ -388,8 +375,7 @@
                 android:text="Latest scam: None"
                 android:textSize="14sp"
                 android:textStyle="bold"
-                android:paddingBottom="4dp"/>
-
+                android:paddingBottom="4dp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -398,8 +384,6 @@
                 android:textSize="12sp"
                 android:textColor="#666666"
                 android:gravity="center" />
-
         </LinearLayout>
-
     </LinearLayout>
 </ScrollView>
