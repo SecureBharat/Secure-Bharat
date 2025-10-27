@@ -64,7 +64,8 @@
         <activity android:name=".LogsActivity" android:exported="true" />
         <activity android:name=".SmsSummaryActivity" android:exported="true" />
         <activity android:name=".FraudCallSummaryActivity" android:exported="true" />
-        <activity android:name=".FraudNumberLookupActivity" android:exported="true" />
+        <activity android:name=".ScamReportActivity" android:exported="true" />
+
 
         <!-- ✅ App Risk Scanner -->
         <activity android:name=".AppRiskScannerActivity" android:exported="true" />
