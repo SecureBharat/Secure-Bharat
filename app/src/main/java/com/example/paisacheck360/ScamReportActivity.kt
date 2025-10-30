@@ -1,28 +1,31 @@
 package com.example.paisacheck360
 
-import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 
 class ScamReportActivity : AppCompatActivity() {
 
     private lateinit var db: DatabaseReference
-    private lateinit var scamContainer: LinearLayout
+    private lateinit var recyclerScamLogs: RecyclerView
     private lateinit var totalScams: TextView
     private lateinit var highRisk: TextView
     private lateinit var blocked: TextView
     private lateinit var backButton: ImageButton
 
+    private lateinit var adapter: ScamAdapter
+    private val scamList = mutableListOf<ScamData>()
+    private var blockedCount = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_scam_report)
 
-        scamContainer = findViewById(R.id.scamLogsContainer)
+        recyclerScamLogs = findViewById(R.id.recyclerScamLogs)
         totalScams = findViewById(R.id.totalScamsCount)
         highRisk = findViewById(R.id.highRiskCount)
         blocked = findViewById(R.id.blockedCount)
@@ -31,85 +34,61 @@ class ScamReportActivity : AppCompatActivity() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: "guest"
         db = FirebaseDatabase.getInstance().getReference("users/$uid/alerts")
 
+        recyclerScamLogs.layoutManager = LinearLayoutManager(this)
+        adapter = ScamAdapter(scamList,
+            onBlock = { scam ->
+                blockedCount++
+                blocked.text = blockedCount.toString()
+                Toast.makeText(this, "🚫 Sender blocked: ${scam.sender}", Toast.LENGTH_SHORT).show()
+            },
+            onReport = { scam ->
+                Toast.makeText(this, "🚨 Reported to Cyber Cell: ${scam.sender}", Toast.LENGTH_SHORT).show()
+            }
+        )
+        recyclerScamLogs.adapter = adapter
+
         loadReportData()
 
-        backButton.setOnClickListener {
-            finish()
-        }
+        backButton.setOnClickListener { finish() }
 
         findViewById<Button>(R.id.exportPdfBtn).setOnClickListener {
-            Toast.makeText(this, "📄 Exporting to PDF coming soon!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "📄 Export to PDF coming soon!", Toast.LENGTH_SHORT).show()
         }
 
         findViewById<Button>(R.id.shareReportBtn).setOnClickListener {
             Toast.makeText(this, "📱 Share option coming soon!", Toast.LENGTH_SHORT).show()
         }
+
+        // 🔥 Filter Buttons
+        findViewById<Button>(R.id.filterAll).setOnClickListener { adapter.filterByRisk("All") }
+        findViewById<Button>(R.id.filterHigh).setOnClickListener { adapter.filterByRisk("High") }
+        findViewById<Button>(R.id.filterMedium).setOnClickListener { adapter.filterByRisk("Medium") }
+        findViewById<Button>(R.id.filterLow).setOnClickListener { adapter.filterByRisk("Low") }
     }
 
     private fun loadReportData() {
         db.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                scamContainer.removeAllViews()
+                scamList.clear()
                 var total = 0
                 var high = 0
-                var blockedCount = 0
 
                 for (child in snapshot.children) {
-                    val sender = child.child("sender").getValue(String::class.java) ?: ""
-                    val body = child.child("body").getValue(String::class.java) ?: ""
-                    val risk = child.child("risk").getValue(String::class.java) ?: "Safe"
-                    if (risk != "Safe") total++
-
-                    if (risk == "High" || risk == "Critical") high++
-
-                    // Create a scam card dynamically
-                    val card = LayoutInflater.from(this@ScamReportActivity)
-                        .inflate(R.layout.item_scam_card, scamContainer, false)
-
-                    val riskBadge = card.findViewById<TextView>(R.id.riskBadge)
-                    val senderText = card.findViewById<TextView>(R.id.senderText)
-                    val messageText = card.findViewById<TextView>(R.id.messageText)
-                    val timeText = card.findViewById<TextView>(R.id.timeText)
-                    val reportBtn = card.findViewById<Button>(R.id.reportBtn)
-                    val blockBtn = card.findViewById<Button>(R.id.blockBtn)
-
-                    // Bind data
-                    senderText.text = "From: $sender"
-                    messageText.text = body
-                    timeText.text = android.text.format.DateFormat.format("dd MMM, hh:mm a",
-                        child.child("timestamp").getValue(Long::class.java) ?: System.currentTimeMillis())
-
-                    riskBadge.text = when (risk) {
-                        "High" -> "🔴 HIGH RISK"
-                        "Medium" -> "🟠 MEDIUM"
-                        "Low" -> "🟡 LOW"
-                        else -> "🟢 SAFE"
+                    val scam = child.getValue(ScamData::class.java)
+                    scam?.let {
+                        scamList.add(it)
+                        if (it.risk != "Safe") total++
+                        if (it.risk == "High" || it.risk == "Critical") high++
                     }
-
-                    val bgColor = when (risk) {
-                        "High" -> "#FFEBEE"
-                        "Medium" -> "#FFF3E0"
-                        "Low" -> "#FFF9C4"
-                        else -> "#E8F5E9"
-                    }
-                    card.setBackgroundColor(android.graphics.Color.parseColor(bgColor))
-
-                    reportBtn.setOnClickListener {
-                        Toast.makeText(this@ScamReportActivity, "Reported to cyber cell 🚨", Toast.LENGTH_SHORT).show()
-                    }
-
-                    blockBtn.setOnClickListener {
-                        blockedCount++
-                        blocked.text = blockedCount.toString()
-                        Toast.makeText(this@ScamReportActivity, "Sender Blocked 🚫", Toast.LENGTH_SHORT).show()
-                    }
-
-                    scamContainer.addView(card)
                 }
+
+                // Sort recent first
+                scamList.sortByDescending { it.timestamp }
 
                 totalScams.text = total.toString()
                 highRisk.text = high.toString()
-                blocked.text = blockedCount.toString()
+
+                adapter.notifyDataSetChanged()
             }
 
             override fun onCancelled(error: DatabaseError) {

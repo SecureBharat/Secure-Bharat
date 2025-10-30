@@ -1,72 +1,61 @@
 package com.example.paisacheck360
 
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-data class SmsData(
-    val id: String = "",
-    val sender: String = "",
-    val body: String = "",
-    val risk: String = "",
-    val timestamp: Long = 0L
-)
+class ScamAdapter(
+    private val originalList: MutableList<ScamData>,
+    private val onBlock: (ScamData) -> Unit,
+    private val onReport: (ScamData) -> Unit
+) : RecyclerView.Adapter<ScamAdapter.ScamViewHolder>() {
 
-class SmsAdapter(private val dataList: MutableList<SmsData>) : RecyclerView.Adapter<SmsAdapter.VH>() {
+    private var filteredList = mutableListOf<ScamData>()
 
-    private var filteredList: List<SmsData> = dataList
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-        val v = LayoutInflater.from(parent.context).inflate(android.R.layout.simple_list_item_2, parent, false)
-        return VH(v)
+    init {
+        filteredList.addAll(originalList)
     }
 
-    override fun onBindViewHolder(holder: VH, position: Int) {
-        val d = filteredList[position]
-        holder.t1.text = "${d.sender} • ${formatTime(d.timestamp)}"
-        val short = if (d.body.length > 160) d.body.substring(0, 160) + "..." else d.body
-        holder.t2.text = "$short\nRisk: ${d.risk}"
-
-        holder.t2.setTextColor(
-            when (d.risk) {
-                "High" -> Color.parseColor("#B00020")
-                "Medium" -> Color.parseColor("#FF8C00")
-                "Low" -> Color.parseColor("#0077CC")
-                "Suspicious" -> Color.parseColor("#E76F51")
-                else -> Color.parseColor("#198754")
-            }
-        )
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ScamViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_scam_card, parent, false)
+        return ScamViewHolder(view)
     }
 
     override fun getItemCount(): Int = filteredList.size
 
-    fun updateData(newList: List<SmsData>) {
-        dataList.clear()
-        dataList.addAll(newList)
-        filteredList = dataList
-        notifyDataSetChanged()
+    override fun onBindViewHolder(holder: ScamViewHolder, position: Int) {
+        val scam = filteredList[position]
+        holder.sender.text = "From: ${scam.sender}"
+        holder.message.text = scam.body
+        holder.riskBadge.text = when (scam.risk) {
+            "Critical" -> "🔴 CRITICAL"
+            "High" -> "🟠 HIGH"
+            "Medium" -> "🟡 MEDIUM"
+            else -> "🟢 SAFE"
+        }
+
+        holder.reportBtn.setOnClickListener { onReport(scam) }
+        holder.blockBtn.setOnClickListener { onBlock(scam) }
     }
 
-    fun filter(query: String, risk: String) {
-        val q = query.lowercase()
-        filteredList = dataList.filter {
-            (it.sender.lowercase().contains(q) || it.body.lowercase().contains(q)) &&
-                    (risk == "All" || it.risk == risk)
+    fun filterByRisk(level: String) {
+        filteredList.clear()
+        if (level == "All") {
+            filteredList.addAll(originalList)
+        } else {
+            filteredList.addAll(originalList.filter { it.risk.equals(level, true) })
         }
         notifyDataSetChanged()
     }
 
-    class VH(view: View) : RecyclerView.ViewHolder(view) {
-        val t1: TextView = view.findViewById(android.R.id.text1)
-        val t2: TextView = view.findViewById(android.R.id.text2)
-    }
-
-    private fun formatTime(ts: Long): String {
-        if (ts <= 0) return ""
-        val sdf = java.text.SimpleDateFormat("dd MMM yyyy • hh:mm a", java.util.Locale.getDefault())
-        return sdf.format(java.util.Date(ts))
+    class ScamViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val sender: TextView = view.findViewById(R.id.senderText)
+        val message: TextView = view.findViewById(R.id.messageText)
+        val riskBadge: TextView = view.findViewById(R.id.riskBadge)
+        val reportBtn: Button = view.findViewById(R.id.reportBtn)
+        val blockBtn: Button = view.findViewById(R.id.blockBtn)
     }
 }

@@ -1,6 +1,7 @@
 package com.example.paisacheck360
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -28,6 +29,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var detailedReportBtn: Button
     private lateinit var viewLogsBtn: Button
     private lateinit var appRiskScannerBtn: LinearLayout
+    private lateinit var wifiGuardBtn: LinearLayout
     private lateinit var scamCountText: TextView
 
     private val PERMISSIONS_REQUEST_CODE = 101
@@ -64,6 +66,7 @@ class MainActivity : AppCompatActivity() {
         detailedReportBtn = findViewById(R.id.detailed_report)
         viewLogsBtn = findViewById(R.id.viewLogsBtn)
         appRiskScannerBtn = findViewById(R.id.app_risk_scanner)
+        wifiGuardBtn = findViewById(R.id.wifi_guard)
     }
 
     private fun setupClickListeners() {
@@ -87,6 +90,10 @@ class MainActivity : AppCompatActivity() {
 
         appRiskScannerBtn.setOnClickListener {
             startActivity(Intent(this, AppRiskScannerActivity::class.java))
+        }
+
+        wifiGuardBtn.setOnClickListener {
+            startActivity(Intent(this, WiFiGuardActivity::class.java))
         }
     }
 
@@ -157,6 +164,7 @@ class MainActivity : AppCompatActivity() {
         db = FirebaseDatabase.getInstance().getReference("users/$uid/alerts")
 
         db.addValueEventListener(object : ValueEventListener {
+            @SuppressLint("SetTextI18n")
             override fun onDataChange(snapshot: DataSnapshot) {
                 var high = 0
                 var medium = 0
@@ -177,6 +185,7 @@ class MainActivity : AppCompatActivity() {
                         "🔴 High: $high | 🟡 Medium: $medium | 🔵 Low: $low | 🟢 Safe: $safe"
             }
 
+            @SuppressLint("SetTextI18n")
             override fun onCancelled(error: DatabaseError) {
                 scamCountText.text = "Failed to load report."
             }

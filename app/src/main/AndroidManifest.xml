@@ -19,6 +19,12 @@
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
         tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
 
     <!-- ✅ Call Detection Permissions -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
@@ -66,9 +72,14 @@
         <activity android:name=".FraudCallSummaryActivity" android:exported="true" />
         <activity android:name=".ScamReportActivity" android:exported="true" />
 
-
         <!-- ✅ App Risk Scanner -->
         <activity android:name=".AppRiskScannerActivity" android:exported="true" />
+
+        <!-- ✅ WiFi Guard -->
+        <activity
+            android:name=".WiFiGuardActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
 
         <!-- ✅ Call Feedback Popup -->
         <activity

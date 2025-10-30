@@ -135,7 +135,7 @@
 
             <!-- Scan UPI ID Tool -->
             <LinearLayout
-                android:id="@+id/scan_upi"
+                android:id="@+id/wifi_guard"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginBottom="12dp"
@@ -158,7 +158,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Scan UPI ID"
+                    android:text="Wifi Guard"
                     android:textColor="#1565C0"
                     android:textStyle="bold"
                     android:textSize="16sp" />
