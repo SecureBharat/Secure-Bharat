@@ -160,8 +160,9 @@ class MainActivity : AppCompatActivity() {
 
     /** ✅ Dynamic scam summary (Firebase) */
     private fun updateScamSummary() {
-        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: "guest"
-        db = FirebaseDatabase.getInstance().getReference("users/$uid/alerts")
+        val androidID = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID) ?: "guest"
+        db = FirebaseDatabase.getInstance("https://sbtest-9acea-default-rtdb.firebaseio.com")
+            .reference.child("users").child(androidID).child("alerts")
 
         db.addValueEventListener(object : ValueEventListener {
             @SuppressLint("SetTextI18n")
@@ -196,18 +197,33 @@ class MainActivity : AppCompatActivity() {
     private fun checkAndRequestPermissions() {
         val permissions = mutableListOf<String>()
 
+        // SMS Permissions
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED)
             permissions.add(Manifest.permission.RECEIVE_SMS)
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED)
             permissions.add(Manifest.permission.READ_SMS)
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) permissions.add(Manifest.permission.POST_NOTIFICATIONS)
 
+        // Phone Permissions
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED)
+            permissions.add(Manifest.permission.READ_PHONE_STATE)
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED)
+            permissions.add(Manifest.permission.READ_CALL_LOG)
+
+        // Notification Permission (Android 13+)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED)
+                permissions.add(Manifest.permission.POST_NOTIFICATIONS)
+        }
+
+        // Request all permissions
         if (permissions.isNotEmpty()) {
             ActivityCompat.requestPermissions(this, permissions.toTypedArray(), PERMISSIONS_REQUEST_CODE)
         }
 
+        // Overlay Permission Check
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
+            Log.w("Permissions", "Overlay permission not granted. Asking user.")
+            // ✅ FIX: Corrected the typo from MANGE to MANAGE
             val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
             startActivity(intent)
         }
