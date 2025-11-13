@@ -2,12 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- ✅ Device Features -->
     <uses-feature
         android:name="android.hardware.telephony"
         android:required="false" />
 
-    <!-- ✅ Permissions -->
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -26,15 +24,14 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
 
-    <!-- ✅ Call Detection Permissions -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_CALL_LOG" />
     <uses-permission android:name="android.permission.ANSWER_PHONE_CALLS" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
 
-    <!-- ✅ App Risk Scanner Permission -->
     <uses-permission
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
@@ -49,7 +46,6 @@
         android:theme="@style/Theme.Material3.DayNight.NoActionBar"
         tools:targetApi="34">
 
-        <!-- ✅ Login Activity (Launcher) -->
         <activity
             android:name=".LoginActivity"
             android:exported="true"
@@ -60,41 +56,23 @@
             </intent-filter>
         </activity>
 
-        <!-- ✅ Main Dashboard -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.PaisaCheck360" />
 
-        <!-- ✅ Logs and Summaries -->
         <activity android:name=".LogsActivity" android:exported="true" />
         <activity android:name=".SmsSummaryActivity" android:exported="true" />
         <activity android:name=".FraudCallSummaryActivity" android:exported="true" />
         <activity android:name=".ScamReportActivity" android:exported="true" />
 
-        <!-- ✅ App Risk Scanner -->
         <activity android:name=".AppRiskScannerActivity" android:exported="true" />
 
-        <!-- ✅ WiFi Guard -->
         <activity
             android:name=".WiFiGuardActivity"
             android:exported="true"
             android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
 
-        <!-- ✅ Call Feedback Popup -->
-        <activity
-            android:name=".CallFeedbackActivity"
-            android:exported="true"
-            android:theme="@style/Theme.Material3.DayNight.Dialog.Alert"
-            android:launchMode="singleTop"
-            android:taskAffinity=""
-            android:excludeFromRecents="true"
-            android:finishOnTaskLaunch="true"
-            android:showWhenLocked="true"
-            android:turnScreenOn="true"
-            android:allowEmbedded="true" />
-
-        <!-- ✅ Scam Popup Foreground Service -->
         <service
             android:name=".ScamPopupService"
             android:enabled="true"
@@ -106,7 +84,16 @@
                 android:value="scam_detection" />
         </service>
 
-        <!-- ✅ SMS Receiver -->
+        <service
+            android:name=".CallPopupService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="scam_detection" />
+        </service>
+
         <receiver
             android:name=".SMSReceiver"
             android:exported="true">
@@ -115,7 +102,6 @@
             </intent-filter>
         </receiver>
 
-        <!-- ✅ Call Receiver -->
         <receiver
             android:name=".CallReceiver"
             android:exported="true">
@@ -124,7 +110,6 @@
             </intent-filter>
         </receiver>
 
-        <!-- ✅ Notification Listener Service -->
         <service
             android:name=".SMSNotificationListener"
             android:enabled="true"
