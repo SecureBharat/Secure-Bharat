@@ -72,8 +72,11 @@ class MainActivity : AppCompatActivity() {
     private fun setupClickListeners() {
         viewAllVideosBtn.setOnClickListener { openYouTubeSearch() }
 
+        /** ✅ Link Scanner integration */
         checkLinkBtn.setOnClickListener {
-            Toast.makeText(this, "Link Checker - Coming Soon!", Toast.LENGTH_SHORT).show()
+            // Launch the new Link Scanner Activity
+            val intent = Intent(this, LinkScannerActivity::class.java)
+            startActivity(intent)
         }
 
         fraudNumberLookupBtn.setOnClickListener {
@@ -223,7 +226,6 @@ class MainActivity : AppCompatActivity() {
         // Overlay Permission Check
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
             Log.w("Permissions", "Overlay permission not granted. Asking user.")
-            // ✅ FIX: Corrected the typo from MANGE to MANAGE
             val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
             startActivity(intent)
         }

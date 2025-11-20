@@ -25,7 +25,6 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
-
     <!-- ✅ Call Detection Permissions -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_CALL_LOG" />
@@ -48,6 +47,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Material3.DayNight.NoActionBar"
         tools:targetApi="34">
+        <activity android:name=".BlockedUrlActivity" />
+
 
         <!-- ✅ Login Activity (Launcher) -->
         <activity
@@ -135,5 +136,13 @@
             </intent-filter>
         </service>
 
+        <!-- ✅ NEW: Link Scanner Activity -->
+        <activity
+            android:name=".LinkScannerActivity"
+            android:exported="true"
+            android:label="Link Scanner"
+            android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
+
     </application>
 </manifest>
+

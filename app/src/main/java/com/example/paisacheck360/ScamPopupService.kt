@@ -37,10 +37,8 @@ class ScamPopupService : Service() {
     private fun showPopup(sender: String, message: String, risk: String, suggestions: ArrayList<String>) {
         windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
 
-        // remove old
         try { windowManager?.removeView(popupView) } catch (_: Exception) {}
 
-        // Background color per risk
         val headerColor = when (risk) {
             "High" -> "#FF5252"
             "Medium" -> "#FFD740"
@@ -49,7 +47,6 @@ class ScamPopupService : Service() {
             else -> "#4CAF50"
         }
 
-        // Main container (rounded)
         popupView = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             val bg = GradientDrawable()
@@ -60,7 +57,6 @@ class ScamPopupService : Service() {
             elevation = 16f
         }
 
-        // Colored header
         val header = TextView(this).apply {
             text = "📩 Message Alert"
             setBackgroundColor(Color.parseColor(headerColor))
@@ -70,7 +66,6 @@ class ScamPopupService : Service() {
         }
         popupView?.addView(header)
 
-        // Sender
         val senderView = TextView(this).apply {
             text = "From: $sender"
             textSize = 14f
@@ -79,7 +74,6 @@ class ScamPopupService : Service() {
         }
         popupView?.addView(senderView)
 
-        // Message content
         val bodyView = TextView(this).apply {
             text = if (message.length > 250) message.take(250) + "..." else message
             textSize = 15f
@@ -88,7 +82,39 @@ class ScamPopupService : Service() {
         }
         popupView?.addView(bodyView)
 
-        // --- Suggested replies ---
+        // ---------------------------------------------------------------------
+        // ⭐⭐ NEW CODE ADDED HERE — URL DETECTION + BUTTON (as requested)
+        // ---------------------------------------------------------------------
+
+        val urls = UrlAnalyzer.extractUrls(message)
+        if (urls.isNotEmpty()) {
+
+            val openBtn = Button(this).apply {
+                text = "🔒 Open Link Safely"
+                setAllCaps(false)
+                textSize = 14f
+                setBackgroundColor(Color.parseColor("#FF5722"))
+                setTextColor(Color.WHITE)
+                setOnClickListener {
+
+                    // ⭐ Requested line (added but disabled ⭐)
+                     UrlBlocker.openUrlWithProtection(this@ScamPopupService, urls[0])
+
+                    Toast.makeText(
+                        this@ScamPopupService,
+                        "Safe-open protection is added but not active.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    removePopup()
+                }
+            }
+
+            popupView?.addView(openBtn)
+        }
+
+        // ---------------------------------------------------------------------
+
         if (suggestions.isNotEmpty()) {
             val label = TextView(this).apply {
                 text = "💡 Suggested replies:"
@@ -125,7 +151,6 @@ class ScamPopupService : Service() {
             popupView?.addView(suggestionsLayout)
         }
 
-        // --- Bottom action buttons ---
         val actionsLayout = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
         }
@@ -145,7 +170,6 @@ class ScamPopupService : Service() {
         })
         popupView?.addView(actionsLayout)
 
-        // --- Add popup to screen ---
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
@@ -153,8 +177,7 @@ class ScamPopupService : Service() {
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
             else
                 WindowManager.LayoutParams.TYPE_PHONE,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                    or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
             PixelFormat.TRANSLUCENT
         )
         params.gravity = Gravity.TOP
