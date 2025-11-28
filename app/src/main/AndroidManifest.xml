@@ -24,8 +24,7 @@
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <!-- No special "internet sniffing" permission required because VpnService is a normal API -->
+
 
     <!-- ✅ Call Detection Permissions -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
@@ -49,8 +48,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Material3.DayNight.NoActionBar"
         tools:targetApi="34">
-
-        <activity android:name=".BlockedUrlActivity" />
 
         <!-- ✅ Login Activity (Launcher) -->
         <activity
@@ -137,24 +134,6 @@
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
         </service>
-
-        <!-- ✅ NEW: Link Scanner Activity -->
-        <activity
-            android:name=".LinkScannerActivity"
-            android:exported="true"
-            android:label="Link Scanner"
-            android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
-
-        <!-- ======= VPN Service (Local) ======= -->
-        <activity
-            android:name=".VpnPermissionActivity"
-            android:exported="true"
-            android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
-
-        <service
-            android:name=".LocalVpnService"
-            android:permission="android.permission.BIND_VPN_SERVICE"
-            android:exported="false" />
 
     </application>
 </manifest>

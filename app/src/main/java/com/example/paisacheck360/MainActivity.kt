@@ -2,6 +2,7 @@ package com.example.paisacheck360
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -15,27 +16,23 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 
 class MainActivity : AppCompatActivity() {
 
-    private val permissionsRequestCode = 101
-
-    // UI Components
     private lateinit var videoContainer: LinearLayout
     private lateinit var viewAllVideosBtn: Button
-    private lateinit var scamSummaryTitle: TextView
-    private lateinit var scamCountText: TextView
-
+    private lateinit var scamSummaryText: TextView
     private lateinit var checkLinkBtn: LinearLayout
     private lateinit var fraudNumberLookupBtn: LinearLayout
     private lateinit var detailedReportBtn: Button
     private lateinit var viewLogsBtn: Button
     private lateinit var appRiskScannerBtn: LinearLayout
     private lateinit var wifiGuardBtn: LinearLayout
-    private lateinit var vpnModeSwitch: Switch
+    private lateinit var scamCountText: TextView
 
-    // Firebase
+    private val PERMISSIONS_REQUEST_CODE = 101
     private lateinit var db: DatabaseReference
 
     private val videos = listOf(
@@ -48,97 +45,35 @@ class MainActivity : AppCompatActivity() {
 
     data class VideoData(val title: String, val youtubeId: String)
 
-    // ----------------------------------------------------------
-    // 🔵 OnCreate
-    // ----------------------------------------------------------
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        initViews()
+        initializeViews()
         loadVideos()
         setupClickListeners()
-        restoreVpnState()
-        checkPermissions()
+        checkAndRequestPermissions()
         updateScamSummary()
     }
 
-    // ----------------------------------------------------------
-    // 🔵 Initialize Views
-    // ----------------------------------------------------------
-    private fun initViews() {
+    private fun initializeViews() {
         videoContainer = findViewById(R.id.videoContainer)
         viewAllVideosBtn = findViewById(R.id.viewAllVideos)
-
-        scamSummaryTitle = findViewById(R.id.appTitle)
+        scamSummaryText = findViewById(R.id.appTitle)
         scamCountText = findViewById(R.id.scam_count_text)
-
         checkLinkBtn = findViewById(R.id.check_link)
         fraudNumberLookupBtn = findViewById(R.id.fraud_number_lookup)
         detailedReportBtn = findViewById(R.id.detailed_report)
         viewLogsBtn = findViewById(R.id.viewLogsBtn)
         appRiskScannerBtn = findViewById(R.id.app_risk_scanner)
         wifiGuardBtn = findViewById(R.id.wifi_guard)
-
-        vpnModeSwitch = findViewById(R.id.vpnModeSwitch)
     }
 
-    // ----------------------------------------------------------
-    // 🔵 Video Loader
-    // ----------------------------------------------------------
-    private fun loadVideos() {
-        videoContainer.removeAllViews()
-
-        videos.forEach { video ->
-            val itemLayout = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                val params = LinearLayout.LayoutParams(dp(170), LinearLayout.LayoutParams.WRAP_CONTENT)
-                params.setMargins(0, 0, dp(16), 0)
-                layoutParams = params
-                setPadding(dp(8), dp(8), dp(8), dp(8))
-                background = getDrawable(android.R.drawable.dialog_frame)
-                elevation = 4f
-            }
-
-            val thumbnail = ImageView(this).apply {
-                layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT, dp(96)
-                )
-                scaleType = ImageView.ScaleType.CENTER_CROP
-            }
-
-            Glide.with(this)
-                .load("https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg")
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .placeholder(android.R.drawable.ic_media_play)
-                .centerCrop()
-                .into(thumbnail)
-
-            thumbnail.setOnClickListener { openYouTubeVideo(video.youtubeId) }
-
-            val title = TextView(this).apply {
-                text = video.title
-                textSize = 13f
-                setTextColor(0xFF333333.toInt())
-                maxLines = 2
-                setPadding(dp(8), dp(12), dp(8), dp(8))
-            }
-
-            itemLayout.addView(thumbnail)
-            itemLayout.addView(title)
-            videoContainer.addView(itemLayout)
-        }
-    }
-
-    // ----------------------------------------------------------
-    // 🔵 Click Listeners
-    // ----------------------------------------------------------
     private fun setupClickListeners() {
-
         viewAllVideosBtn.setOnClickListener { openYouTubeSearch() }
 
         checkLinkBtn.setOnClickListener {
-            startActivity(Intent(this, LinkScannerActivity::class.java))
+            Toast.makeText(this, "Link Checker - Coming Soon!", Toast.LENGTH_SHORT).show()
         }
 
         fraudNumberLookupBtn.setOnClickListener {
@@ -160,36 +95,53 @@ class MainActivity : AppCompatActivity() {
         wifiGuardBtn.setOnClickListener {
             startActivity(Intent(this, WiFiGuardActivity::class.java))
         }
+    }
 
-        vpnModeSwitch.setOnCheckedChangeListener { _, isChecked ->
-            handleVpnSwitch(isChecked)
+    private fun loadVideos() {
+        videoContainer.removeAllViews()
+
+        videos.forEach { video ->
+            val itemLayout = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                val params = LinearLayout.LayoutParams(dpToPx(170), LinearLayout.LayoutParams.WRAP_CONTENT)
+                params.setMargins(0, 0, dpToPx(16), 0)
+                layoutParams = params
+                setPadding(dpToPx(8), dpToPx(8), dpToPx(8), dpToPx(8))
+                background = getDrawable(android.R.drawable.dialog_frame)
+                elevation = 4f
+            }
+
+            val thumbnail = ImageView(this).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, dpToPx(96)
+                )
+                scaleType = ImageView.ScaleType.CENTER_CROP
+            }
+
+            Glide.with(this)
+                .load("https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg")
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .placeholder(android.R.drawable.ic_media_play)
+                .error(android.R.drawable.stat_notify_error)
+                .centerCrop()
+                .into(thumbnail)
+
+            thumbnail.setOnClickListener { openYouTubeVideo(video.youtubeId) }
+
+            val title = TextView(this).apply {
+                text = video.title
+                textSize = 13f
+                setTextColor(0xFF333333.toInt())
+                maxLines = 2
+                setPadding(dpToPx(8), dpToPx(12), dpToPx(8), dpToPx(8))
+            }
+
+            itemLayout.addView(thumbnail)
+            itemLayout.addView(title)
+            videoContainer.addView(itemLayout)
         }
     }
 
-    // ----------------------------------------------------------
-    // 🔵 VPN Mode Saving & Background Service Control
-    // ----------------------------------------------------------
-    private fun handleVpnSwitch(isEnabled: Boolean) {
-        val prefs = getSharedPreferences("SecureBharatPrefs", MODE_PRIVATE)
-
-        prefs.edit().putString("vpn_mode", if (isEnabled) "block" else "monitor").apply()
-
-        val intent = Intent(this, LocalVpnService::class.java)
-        intent.action = if (isEnabled) "START" else "STOP"
-
-        startService(intent)
-
-        Toast.makeText(this, "VPN mode: ${if (isEnabled) "Block Suspicious" else "Monitor Only"}", Toast.LENGTH_SHORT).show()
-    }
-
-    private fun restoreVpnState() {
-        val prefs = getSharedPreferences("SecureBharatPrefs", MODE_PRIVATE)
-        vpnModeSwitch.isChecked = prefs.getString("vpn_mode", "block") == "block"
-    }
-
-    // ----------------------------------------------------------
-    // 🔵 YouTube Helpers
-    // ----------------------------------------------------------
     private fun openYouTubeVideo(videoId: String) {
         try {
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:$videoId"))
@@ -201,23 +153,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun openYouTubeSearch() {
-        startActivity(Intent(Intent.ACTION_VIEW,
-            Uri.parse("https://www.youtube.com/results?search_query=digital+fraud+prevention+india")))
+        val intent = Intent(Intent.ACTION_VIEW,
+            Uri.parse("https://www.youtube.com/results?search_query=digital+fraud+prevention+india"))
+        startActivity(intent)
     }
 
-    // ----------------------------------------------------------
-    // 🔵 Scam Summary from Firebase
-    // ----------------------------------------------------------
+    /** ✅ Dynamic scam summary (Firebase) */
     private fun updateScamSummary() {
         val androidID = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID) ?: "guest"
-
         db = FirebaseDatabase.getInstance("https://sbtest-9acea-default-rtdb.firebaseio.com")
-            .getReference("users/$androidID/alerts")
+            .reference.child("users").child(androidID).child("alerts")
 
         db.addValueEventListener(object : ValueEventListener {
             @SuppressLint("SetTextI18n")
             override fun onDataChange(snapshot: DataSnapshot) {
-
                 var high = 0
                 var medium = 0
                 var low = 0
@@ -232,52 +181,56 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
-                scamSummaryTitle.text = "Secure Bharat – Active Protection"
-
-                scamCountText.text =
-                    "📅 Last 7 Days: ${high + medium + low} scams flagged\n" +
-                            "🔴 High: $high  |  🟡 Medium: $medium  |  🔵 Low: $low  |  🟢 Safe: $safe"
+                scamSummaryText.text = "Secure Bharat – Active Protection"
+                scamCountText.text = "📅 Last 7 Days: ${high + medium + low} scams flagged\n" +
+                        "🔴 High: $high | 🟡 Medium: $medium | 🔵 Low: $low | 🟢 Safe: $safe"
             }
 
+            @SuppressLint("SetTextI18n")
             override fun onCancelled(error: DatabaseError) {
                 scamCountText.text = "Failed to load report."
             }
         })
     }
 
-    // ----------------------------------------------------------
-    // 🔵 Permission Request
-    // ----------------------------------------------------------
-    private fun checkPermissions() {
-        val required = mutableListOf<String>()
+    /** ✅ Permission checks */
+    private fun checkAndRequestPermissions() {
+        val permissions = mutableListOf<String>()
 
-        fun addPermission(perm: String) {
-            if (ContextCompat.checkSelfPermission(this, perm) != PackageManager.PERMISSION_GRANTED)
-                required.add(perm)
-        }
+        // SMS Permissions
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED)
+            permissions.add(Manifest.permission.RECEIVE_SMS)
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED)
+            permissions.add(Manifest.permission.READ_SMS)
 
-        addPermission(Manifest.permission.RECEIVE_SMS)
-        addPermission(Manifest.permission.READ_SMS)
-        addPermission(Manifest.permission.READ_PHONE_STATE)
-        addPermission(Manifest.permission.READ_CALL_LOG)
+        // Phone Permissions
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED)
+            permissions.add(Manifest.permission.READ_PHONE_STATE)
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED)
+            permissions.add(Manifest.permission.READ_CALL_LOG)
 
+        // Notification Permission (Android 13+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            addPermission(Manifest.permission.POST_NOTIFICATIONS)
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED)
+                permissions.add(Manifest.permission.POST_NOTIFICATIONS)
         }
 
-        if (required.isNotEmpty()) {
-            ActivityCompat.requestPermissions(this, required.toTypedArray(), permissionsRequestCode)
+        // Request all permissions
+        if (permissions.isNotEmpty()) {
+            ActivityCompat.requestPermissions(this, permissions.toTypedArray(), PERMISSIONS_REQUEST_CODE)
         }
 
+        // Overlay Permission Check
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
-            startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
+            Log.w("Permissions", "Overlay permission not granted. Asking user.")
+            // ✅ FIX: Corrected the typo from MANGE to MANAGE
+            val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
+            startActivity(intent)
         }
     }
 
-    // ----------------------------------------------------------
-    // 🔵 Utility
-    // ----------------------------------------------------------
-    private fun dp(value: Int): Int {
-        return (value * resources.displayMetrics.density + 0.5).toInt()
+    private fun dpToPx(dp: Int): Int {
+        val density = resources.displayMetrics.density
+        return (dp * density + 0.5f).toInt()
     }
 }
