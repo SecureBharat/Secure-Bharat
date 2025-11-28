@@ -39,25 +39,41 @@ class AppRiskAdapter(private val apps: List<AppRiskInfo>) :
         holder.appName.text = app.appName
         holder.packageName.text = app.packageName
 
-        // Set risk badge
+        // Risk badge
         holder.riskBadge.setBackgroundColor(app.riskLevel.color)
         holder.riskEmoji.text = app.riskLevel.emoji
         holder.riskScore.text = app.riskScore.toString()
 
-        // Set risk level
+        // Risk label
         holder.riskLevel.text = "${app.riskLevel.emoji} ${app.riskLevel.displayName}"
         holder.riskLevel.setTextColor(app.riskLevel.color)
 
-        // Set dangerous permissions
-        if (app.dangerousPermissions.isEmpty()) {
+        // Build dangerous permissions text with Phase-3 info
+        val dp = app.dangerousPermissions
+        val newDp = app.newDangerousPermissions
+
+        if (dp.isEmpty() && newDp.isEmpty()) {
             holder.dangerousPermissions.text = "✅ None detected"
             holder.dangerousPermissions.setTextColor(0xFF4CAF50.toInt())
         } else {
-            holder.dangerousPermissions.text = app.dangerousPermissions.joinToString("\n")
+            val builder = StringBuilder()
+
+            if (dp.isNotEmpty()) {
+                builder.append("Dangerous permissions:\n")
+                builder.append(dp.joinToString("\n"))
+            }
+
+            if (newDp.isNotEmpty()) {
+                if (builder.isNotEmpty()) builder.append("\n\n")
+                builder.append("⚠ Newly added risky permissions:\n")
+                builder.append(newDp.joinToString("\n"))
+            }
+
+            holder.dangerousPermissions.text = builder.toString()
             holder.dangerousPermissions.setTextColor(0xFF666666.toInt())
         }
 
-        // Set other details
+        // Other details
         holder.totalPermissions.text = app.totalPermissions.toString()
         holder.systemApp.text = if (app.isSystemApp) "Yes" else "No"
 

@@ -1,5 +1,9 @@
 package com.example.paisacheck360
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -23,6 +27,35 @@ class AppRiskScannerActivity : AppCompatActivity() {
     private lateinit var mediumCount: TextView
     private lateinit var lowCount: TextView
 
+    // ----------------------------------------
+    // 🔥 PHASE-4: Network Threat Receiver
+    // ----------------------------------------
+    private val networkThreatReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+
+            val domain = intent.getStringExtra("domain") ?: return
+            val appPackage = intent.getStringExtra("appPackage")
+            val suspicious = intent.getBooleanExtra("suspicious", false)
+
+            if (suspicious) {
+                Toast.makeText(
+                    this@AppRiskScannerActivity,
+                    "⚠️ Network Threat Detected: $domain",
+                    Toast.LENGTH_LONG
+                ).show()
+
+                Log.w(
+                    "SecureBharat-Network",
+                    "Threat detected → Domain=$domain | App=$appPackage"
+                )
+            }
+        }
+    }
+
+    // ----------------------------------------
+    // Activity Lifecycle
+    // ----------------------------------------
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d("AppRiskScanner", "📱 Activity onCreate")
@@ -34,6 +67,37 @@ class AppRiskScannerActivity : AppCompatActivity() {
         initializeViews()
         startScanning()
     }
+
+    override fun onResume() {
+        super.onResume()
+
+        // Register threat listener safely
+        try {
+            registerReceiver(
+                networkThreatReceiver,
+                IntentFilter("com.securebharat.NETWORK_THREAT")
+            )
+            Log.d("SecureBharat-Network", "Receiver registered for AppRiskScannerActivity")
+        } catch (e: Exception) {
+            Log.e("SecureBharat-Network", "Receiver error: ${e.message}")
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        // unregister receiver safely
+        try {
+            unregisterReceiver(networkThreatReceiver)
+            Log.d("SecureBharat-Network", "Receiver unregistered")
+        } catch (_: IllegalArgumentException) {
+            // Ignore: receiver not registered
+        }
+    }
+
+    // ----------------------------------------
+    // UI + Scanner Logic
+    // ----------------------------------------
 
     private fun initializeViews() {
         Log.d("AppRiskScanner", "🎨 Initializing views")
@@ -57,30 +121,18 @@ class AppRiskScannerActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                // Show loading
-                Log.d("AppRiskScanner", "📊 Showing loading UI")
                 progressBar.visibility = View.VISIBLE
                 loadingText.visibility = View.VISIBLE
                 recyclerView.visibility = View.GONE
 
-                // Scan apps with full analysis
-                Log.d("AppRiskScanner", "🔎 Creating scanner...")
                 val scanner = AppScanner(this@AppRiskScannerActivity)
 
-                Log.d("AppRiskScanner", "📱 Scanning apps with risk analysis...")
                 val apps = scanner.scanAllApps()
-                Log.d("AppRiskScanner", "✅ Found ${apps.size} apps")
-
-                Log.d("AppRiskScanner", "📊 Getting statistics...")
                 val stats = scanner.getStatistics()
-                Log.d("AppRiskScanner", "✅ Stats: Critical=${stats.criticalApps}, High=${stats.highRiskApps}, Medium=${stats.mediumRiskApps}, Low=${stats.lowRiskApps}")
 
-                // Update UI
-                Log.d("AppRiskScanner", "🎨 Updating UI...")
                 updateStatistics(stats)
                 displayApps(apps)
 
-                // Hide loading
                 progressBar.visibility = View.GONE
                 loadingText.visibility = View.GONE
                 recyclerView.visibility = View.VISIBLE
@@ -91,18 +143,10 @@ class AppRiskScannerActivity : AppCompatActivity() {
                     Toast.LENGTH_SHORT
                 ).show()
 
-                Log.d("AppRiskScanner", "✅ Full scan complete!")
-
             } catch (e: Exception) {
                 Log.e("AppRiskScanner", "❌ ERROR: ${e.message}", e)
                 loadingText.text = "❌ Error: ${e.message}"
                 progressBar.visibility = View.GONE
-
-                Toast.makeText(
-                    this@AppRiskScannerActivity,
-                    "Error: ${e.message}",
-                    Toast.LENGTH_LONG
-                ).show()
             }
         }
     }
@@ -117,8 +161,6 @@ class AppRiskScannerActivity : AppCompatActivity() {
 
     private fun displayApps(apps: List<AppRiskInfo>) {
         Log.d("AppRiskScanner", "📋 Displaying ${apps.size} apps in RecyclerView")
-        val adapter = AppRiskAdapter(apps)
-        recyclerView.adapter = adapter
-        Log.d("AppRiskScanner", "✅ Adapter set successfully")
+        recyclerView.adapter = AppRiskAdapter(apps)
     }
 }
