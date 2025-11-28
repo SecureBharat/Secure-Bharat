@@ -1,17 +1,20 @@
 package com.example.paisacheck360
 
+import android.graphics.Color
 import android.os.Bundle
+import android.provider.Settings
+import android.util.Log
 import android.view.LayoutInflater
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import com.google.firebase.database.*
 
 class FraudCallSummaryActivity : AppCompatActivity() {
 
     private lateinit var callListContainer: LinearLayout
-    private val gson = Gson()
+    private lateinit var db: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,42 +22,62 @@ class FraudCallSummaryActivity : AppCompatActivity() {
 
         callListContainer = findViewById(R.id.callListContainer)
 
-        // ✅ Dummy values for now
-        val dummyJson = """
-            [
-                {"caller":"Bank Alert Dept.","message":"This is the fraud department from your bank.","riskLevel":"High","date":"2025-08-19"},
-                {"caller":"Local Police Dept.","message":"You are under investigation for suspicious activity.","riskLevel":"Medium","date":"2025-08-19"},
-                {"caller":"Windows Support Center","message":"We've detected a virus on your computer.","riskLevel":"Low","date":"2025-08-19"}
-            ]
-        """
+        // 1. Get Android ID to find the user's data
+        val androidID = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID) ?: "guest"
 
-        val type = object : TypeToken<List<FraudCall>>() {}.type
-        val callList: List<FraudCall> = gson.fromJson(dummyJson, type)
+        // 2. Point to the correct path in Firebase
+        db = FirebaseDatabase.getInstance("https://sbtest-9acea-default-rtdb.firebaseio.com")
+            .reference.child("users").child(androidID).child("call_feedback")
 
-        showCalls(callList)
+        loadRealData()
     }
 
-    private fun showCalls(callList: List<FraudCall>) {
-        callListContainer.removeAllViews()
+    private fun loadRealData() {
+        db.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                callListContainer.removeAllViews()
+
+                if (!snapshot.exists()) {
+                    Toast.makeText(this@FraudCallSummaryActivity, "No call logs found.", Toast.LENGTH_SHORT).show()
+                    return
+                }
+
+                // Loop through all saved calls
+                for (child in snapshot.children) {
+                    // The key is the phone number (e.g., +918652811987)
+                    val phoneNumber = child.key ?: "Unknown"
+                    val status = child.child("status").getValue(String::class.java) ?: "Unknown"
+                    val timestamp = child.child("timestamp").getValue(String::class.java) ?: ""
+
+                    addCallView(phoneNumber, status, timestamp)
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("FraudCallSummary", "Failed to load logs: ${error.message}")
+            }
+        })
+    }
+
+    private fun addCallView(number: String, status: String, date: String) {
         val inflater = LayoutInflater.from(this)
+        // Using simple_list_item_2 is fine, or you can make a custom layout later
+        val itemView = inflater.inflate(android.R.layout.simple_list_item_2, callListContainer, false)
 
-        callList.forEach { call ->
-            val itemView = inflater.inflate(android.R.layout.simple_list_item_2, callListContainer, false)
-            val text1 = itemView.findViewById<TextView>(android.R.id.text1)
-            val text2 = itemView.findViewById<TextView>(android.R.id.text2)
+        val text1 = itemView.findViewById<TextView>(android.R.id.text1)
+        val text2 = itemView.findViewById<TextView>(android.R.id.text2)
 
-            text1.text = "Caller ID: ${call.caller} • Risk: ${call.riskLevel}"
-            text2.text = call.message
+        // Format the text
+        text1.text = "📞 $number"
+        text2.text = "Status: $status  •  Time: $date"
 
-            callListContainer.addView(itemView)
+        // Optional: Color code the scam calls
+        if (status == "Scam") {
+            text1.setTextColor(Color.RED)
+        } else {
+            text1.setTextColor(Color.parseColor("#2E7D32")) // Dark Green
         }
+
+        callListContainer.addView(itemView)
     }
 }
-
-// ✅ Data class
-data class FraudCall(
-    val caller: String,
-    val message: String,
-    val riskLevel: String,
-    val date: String
-)

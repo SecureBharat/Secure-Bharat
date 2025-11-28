@@ -38,6 +38,8 @@ class CallPopupService : Service() {
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
 
         val androidID = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID) ?: "guest"
+
+        // ❗️✅ FIX 1: Corrected URL (changed 'https.' to 'https://')
         db = FirebaseDatabase.getInstance("https://sbtest-9acea-default-rtdb.firebaseio.com")
             .reference.child("users").child(androidID).child("call_feedback")
     }
@@ -142,7 +144,6 @@ class CallPopupService : Service() {
                 btnSafe.visibility = View.VISIBLE
                 btnSafe.text = "OK"
                 btnSafe.setOnClickListener {
-                    // ❗️ FIX: Remove the view *immediately*
                     removePopup()
                     stopSelf()
                 }
@@ -154,13 +155,11 @@ class CallPopupService : Service() {
 
                 btnScam.setOnClickListener {
                     saveFeedback(number, "Scam")
-                    // ❗️ FIX: Remove the view *immediately*
                     removePopup()
                     stopSelf()
                 }
                 btnSafe.setOnClickListener {
                     saveFeedback(number, "Safe")
-                    // ❗️ FIX: Remove the view *immediately*
                     removePopup()
                     stopSelf()
                 }
@@ -178,14 +177,11 @@ class CallPopupService : Service() {
         }
     }
 
-    /**
-     * ❗️ NEW: Helper function to safely remove the popup
-     */
     private fun removePopup() {
         popupView?.let {
             try {
                 windowManager.removeView(it)
-                popupView = null // Clear the view
+                popupView = null
             } catch (e: Exception) {
                 Log.e("CallPopupService", "Error removing popup view", e)
             }
@@ -199,7 +195,8 @@ class CallPopupService : Service() {
             return
         }
 
-        val dbRef = FirebaseDatabase.getInstance("https.sbtest-9acea-default-rtdb.firebaseio.com")
+        // ❗️✅ FIX 2: Corrected URL here as well
+        val dbRef = FirebaseDatabase.getInstance("https://sbtest-9acea-default-rtdb.firebaseio.com")
             .reference.child("users").child(androidID).child("call_feedback")
 
         val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
@@ -233,7 +230,6 @@ class CallPopupService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // This is the failsafe for when the CallReceiver stops the service
         removePopup()
     }
 }
