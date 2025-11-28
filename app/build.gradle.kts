@@ -41,6 +41,7 @@ android {
 
     buildFeatures {
         viewBinding = true
+        mlModelBinding = true
     }
 }
 
@@ -76,6 +77,8 @@ dependencies {
 
     // ✅ Glide (image loading)
     implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation(libs.tensorflow.lite.support)
+    implementation(libs.tensorflow.lite.metadata)
     kapt("com.github.bumptech.glide:compiler:4.16.0")
 
     // ✅ YouTube Player
@@ -85,4 +88,5 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
 }
