@@ -11,7 +11,8 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- App Title with Shield Icon -->
+
+        <!-- 🔥 TOP HEADER : TITLE + PROFILE -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -36,7 +37,89 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="🇮🇳"
-                android:textSize="20sp" />
+                android:textSize="20sp"
+                android:layout_marginEnd="8dp" />
+
+            <ImageView
+                android:id="@+id/profileBtn"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/ic_profile"
+                android:contentDescription="Profile"
+                android:padding="6dp" />
+        </LinearLayout>
+
+        <!-- 🟢🔴 DEVICE STATUS BAR -->
+        <LinearLayout
+            android:id="@+id/deviceStatusBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="10dp"
+            android:layout_marginBottom="14dp"
+            android:background="#E8F5E9">
+
+            <TextView
+                android:id="@+id/deviceStatusText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🟢 Connected to Veghna Antivirus"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:textColor="#2E7D32"/>
+        </LinearLayout>
+
+        <!-- 🔥 Live Device Stats -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_card"
+            android:padding="20dp"
+            android:layout_marginBottom="16dp"
+            android:elevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingBottom="12dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="🛰️ Live Device Stats"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="#0D47A1" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="📡"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/threatCountText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Loading stats..."
+                android:textSize="15sp"
+                android:textColor="#333333"
+                android:lineSpacingExtra="4dp"
+                android:paddingBottom="8dp" />
+
+            <TextView
+                android:id="@+id/lastSyncText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🕒 Last Sync: --"
+                android:textSize="14sp"
+                android:textColor="#666666" />
         </LinearLayout>
 
         <!-- Learn to Stay Safe Section -->
@@ -133,7 +216,6 @@
                     android:textSize="16sp" />
             </LinearLayout>
 
-            <!-- Scan UPI ID Tool -->
             <LinearLayout
                 android:id="@+id/wifi_guard"
                 android:layout_width="match_parent"
@@ -171,7 +253,6 @@
                     android:textSize="14sp" />
             </LinearLayout>
 
-            <!-- Check Link Tool -->
             <LinearLayout
                 android:id="@+id/check_link"
                 android:layout_width="match_parent"
@@ -209,7 +290,6 @@
                     android:textSize="14sp" />
             </LinearLayout>
 
-            <!-- Fraud Number Lookup -->
             <LinearLayout
                 android:id="@+id/fraud_number_lookup"
                 android:layout_width="match_parent"
@@ -247,7 +327,6 @@
                     android:textSize="14sp" />
             </LinearLayout>
 
-            <!-- App Risk Scanner -->
             <LinearLayout
                 android:id="@+id/app_risk_scanner"
                 android:layout_width="match_parent"
@@ -321,7 +400,7 @@
 
             <TextView
                 android:id="@+id/scam_count_text"
-                android:layout_width="wrap_content"
+                android.layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingBottom="8dp"
                 android:text="📅 Last 7 Days: 0 scams blocked"
@@ -366,7 +445,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:padding="16dp">
+            android:padding="16dp"
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/scam_latest_headline"
@@ -385,5 +465,6 @@
                 android:textColor="#666666"
                 android:gravity="center" />
         </LinearLayout>
+
     </LinearLayout>
 </ScrollView>

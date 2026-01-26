@@ -1,236 +1,178 @@
 package com.example.paisacheck360
 
-import android.Manifest
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var videoContainer: LinearLayout
     private lateinit var viewAllVideosBtn: Button
     private lateinit var scamSummaryText: TextView
+
+    private lateinit var wifiGuardBtn: LinearLayout
     private lateinit var checkLinkBtn: LinearLayout
     private lateinit var fraudNumberLookupBtn: LinearLayout
-    private lateinit var detailedReportBtn: Button
-    private lateinit var viewLogsBtn: Button
     private lateinit var appRiskScannerBtn: LinearLayout
-    private lateinit var wifiGuardBtn: LinearLayout
-    private lateinit var scamCountText: TextView
+    private lateinit var detailedReportBtn: Button
 
-    private val PERMISSIONS_REQUEST_CODE = 101
-    private lateinit var db: DatabaseReference
+    private lateinit var profileBtn: ImageView
 
-    private val videos = listOf(
-        VideoData("UPI Fraud Prevention", "XKfgdkcIUxw"),
-        VideoData("Digital Payment Safety", "IUG2fB4gKKU"),
-        VideoData("Phone Scam Alerts", "dQw4w9WgXcQ"),
-        VideoData("WhatsApp Scam Prevention", "2Vv-BfVoq4g"),
-        VideoData("Online Banking Tips", "fC7oUOUEEi4")
-    )
+    // 🔥 Device Status
+    private lateinit var deviceStatusBar: LinearLayout
+    private lateinit var deviceStatusText: TextView
 
-    data class VideoData(val title: String, val youtubeId: String)
+    // 🔥 Live Stats
+    private lateinit var threatCountText: TextView
+    private lateinit var lastSyncText: TextView
+
+    // 🔥 Firebase
+    private lateinit var database: DatabaseReference
+
+    // 👉 YOUR REAL SID (from screenshot)
+    private val deviceSID = "nDvU7cLlHc8cRKDEvt1HJCt0Zk2"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        initializeViews()
-        loadVideos()
-        setupClickListeners()
-        checkAndRequestPermissions()
-        updateScamSummary()
-    }
-
-    private fun initializeViews() {
-        videoContainer = findViewById(R.id.videoContainer)
+        // ===== Bind Views =====
         viewAllVideosBtn = findViewById(R.id.viewAllVideos)
-        scamSummaryText = findViewById(R.id.appTitle)
-        scamCountText = findViewById(R.id.scam_count_text)
+        scamSummaryText = findViewById(R.id.scam_count_text)
+
+        wifiGuardBtn = findViewById(R.id.wifi_guard)
         checkLinkBtn = findViewById(R.id.check_link)
         fraudNumberLookupBtn = findViewById(R.id.fraud_number_lookup)
-        detailedReportBtn = findViewById(R.id.detailed_report)
-        viewLogsBtn = findViewById(R.id.viewLogsBtn)
         appRiskScannerBtn = findViewById(R.id.app_risk_scanner)
-        wifiGuardBtn = findViewById(R.id.wifi_guard)
-    }
+        detailedReportBtn = findViewById(R.id.detailed_report)
 
-    private fun setupClickListeners() {
-        viewAllVideosBtn.setOnClickListener { openYouTubeSearch() }
+        profileBtn = findViewById(R.id.profileBtn)
 
-        checkLinkBtn.setOnClickListener {
-            Toast.makeText(this, "Link Checker - Coming Soon!", Toast.LENGTH_SHORT).show()
-        }
+        deviceStatusBar = findViewById(R.id.deviceStatusBar)
+        deviceStatusText = findViewById(R.id.deviceStatusText)
 
-        fraudNumberLookupBtn.setOnClickListener {
-            startActivity(Intent(this, FraudCallSummaryActivity::class.java))
-        }
+        threatCountText = findViewById(R.id.threatCountText)
+        lastSyncText = findViewById(R.id.lastSyncText)
 
-        detailedReportBtn.setOnClickListener {
-            startActivity(Intent(this, ScamReportActivity::class.java))
-        }
+        // ===== Firebase Path =====
+        database = FirebaseDatabase.getInstance()
+            .reference
+            .child(deviceSID)
+            .child("summary")
 
-        viewLogsBtn.setOnClickListener {
-            startActivity(Intent(this, SmsSummaryActivity::class.java))
-        }
+        checkRequiredPermissions()
+        listenToFirebaseSummary()
 
-        appRiskScannerBtn.setOnClickListener {
-            startActivity(Intent(this, AppRiskScannerActivity::class.java))
+        // ===== Click Listeners =====
+
+        viewAllVideosBtn.setOnClickListener {
+            Toast.makeText(this, "Security videos coming soon", Toast.LENGTH_SHORT).show()
         }
 
         wifiGuardBtn.setOnClickListener {
-            startActivity(Intent(this, WiFiGuardActivity::class.java))
+            Toast.makeText(this, "Wifi Guard coming soon", Toast.LENGTH_SHORT).show()
+        }
+
+        checkLinkBtn.setOnClickListener {
+            Toast.makeText(this, "Link check coming soon", Toast.LENGTH_SHORT).show()
+        }
+
+        fraudNumberLookupBtn.setOnClickListener {
+            Toast.makeText(this, "Fraud number lookup coming soon", Toast.LENGTH_SHORT).show()
+        }
+
+        appRiskScannerBtn.setOnClickListener {
+            Toast.makeText(this, "App risk scanner coming soon", Toast.LENGTH_SHORT).show()
+        }
+
+        detailedReportBtn.setOnClickListener {
+            Toast.makeText(this, "Detailed report coming soon", Toast.LENGTH_SHORT).show()
+        }
+
+        profileBtn.setOnClickListener {
+            startActivity(Intent(this, ProfileActivity::class.java))
         }
     }
 
-    private fun loadVideos() {
-        videoContainer.removeAllViews()
+    // 🔥 LISTEN TO YOUR REAL SUMMARY NODE
+    private fun listenToFirebaseSummary() {
 
-        videos.forEach { video ->
-            val itemLayout = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                val params = LinearLayout.LayoutParams(dpToPx(170), LinearLayout.LayoutParams.WRAP_CONTENT)
-                params.setMargins(0, 0, dpToPx(16), 0)
-                layoutParams = params
-                setPadding(dpToPx(8), dpToPx(8), dpToPx(8), dpToPx(8))
-                background = getDrawable(android.R.drawable.dialog_frame)
-                elevation = 4f
-            }
+        database.addValueEventListener(object : ValueEventListener {
 
-            val thumbnail = ImageView(this).apply {
-                layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT, dpToPx(96)
-                )
-                scaleType = ImageView.ScaleType.CENTER_CROP
-            }
-
-            Glide.with(this)
-                .load("https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg")
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .placeholder(android.R.drawable.ic_media_play)
-                .error(android.R.drawable.stat_notify_error)
-                .centerCrop()
-                .into(thumbnail)
-
-            thumbnail.setOnClickListener { openYouTubeVideo(video.youtubeId) }
-
-            val title = TextView(this).apply {
-                text = video.title
-                textSize = 13f
-                setTextColor(0xFF333333.toInt())
-                maxLines = 2
-                setPadding(dpToPx(8), dpToPx(12), dpToPx(8), dpToPx(8))
-            }
-
-            itemLayout.addView(thumbnail)
-            itemLayout.addView(title)
-            videoContainer.addView(itemLayout)
-        }
-    }
-
-    private fun openYouTubeVideo(videoId: String) {
-        try {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:$videoId"))
-            intent.setPackage("com.google.android.youtube")
-            startActivity(intent)
-        } catch (e: Exception) {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.youtube.com/watch?v=$videoId")))
-        }
-    }
-
-    private fun openYouTubeSearch() {
-        val intent = Intent(Intent.ACTION_VIEW,
-            Uri.parse("https://www.youtube.com/results?search_query=digital+fraud+prevention+india"))
-        startActivity(intent)
-    }
-
-    /** ✅ Dynamic scam summary (Firebase) */
-    private fun updateScamSummary() {
-        val androidID = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID) ?: "guest"
-        db = FirebaseDatabase.getInstance("https://sbtest-9acea-default-rtdb.firebaseio.com")
-            .reference.child("users").child(androidID).child("alerts")
-
-        db.addValueEventListener(object : ValueEventListener {
-            @SuppressLint("SetTextI18n")
             override fun onDataChange(snapshot: DataSnapshot) {
-                var high = 0
-                var medium = 0
-                var low = 0
-                var safe = 0
 
-                for (child in snapshot.children) {
-                    when (child.child("risk").getValue(String::class.java)) {
-                        "High" -> high++
-                        "Medium" -> medium++
-                        "Low" -> low++
-                        else -> safe++
-                    }
+                if (!snapshot.exists()) {
+                    updateDeviceStatus(false)
+                    return
                 }
 
-                scamSummaryText.text = "Secure Bharat – Active Protection"
-                scamCountText.text = "📅 Last 7 Days: ${high + medium + low} scams flagged\n" +
-                        "🔴 High: $high | 🟡 Medium: $medium | 🔵 Low: $low | 🟢 Safe: $safe"
+                val files = snapshot.child("files").getValue(Int::class.java) ?: 0
+                val network = snapshot.child("network").getValue(Int::class.java) ?: 0
+                val processes = snapshot.child("processes").getValue(Int::class.java) ?: 0
+                val threats = snapshot.child("threats").getValue(Int::class.java) ?: 0
+                val updatedAt = snapshot.child("updatedAt").getValue(String::class.java) ?: "--"
+
+                updateDeviceStatus(true)
+
+                threatCountText.text =
+                    "🛡 Threats: $threats   📁 Files: $files\n🌐 Network: $network   ⚙ Processes: $processes"
+
+                lastSyncText.text = "🕒 Last Sync: $updatedAt"
             }
 
-            @SuppressLint("SetTextI18n")
             override fun onCancelled(error: DatabaseError) {
-                scamCountText.text = "Failed to load report."
+                Toast.makeText(this@MainActivity, "Firebase error", Toast.LENGTH_SHORT).show()
+                updateDeviceStatus(false)
             }
         })
     }
 
-    /** ✅ Permission checks */
-    private fun checkAndRequestPermissions() {
-        val permissions = mutableListOf<String>()
+    private fun updateScamCount() {
+        val prefs = getSharedPreferences("SecureBharatPrefs", Context.MODE_PRIVATE)
+        val scamCount = prefs.getInt("scam_count", 0)
+        scamSummaryText.text = "📅 Last 7 Days: $scamCount scams blocked"
+    }
 
-        // SMS Permissions
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED)
-            permissions.add(Manifest.permission.RECEIVE_SMS)
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED)
-            permissions.add(Manifest.permission.READ_SMS)
+    private fun updateDeviceStatus(isConnected: Boolean) {
+        if (isConnected) {
+            deviceStatusBar.setBackgroundColor(0xFFE8F5E9.toInt())
+            deviceStatusText.text = "🟢 Device Connected"
+        } else {
+            deviceStatusBar.setBackgroundColor(0xFFFFEBEE.toInt())
+            deviceStatusText.text = "🔴 Device Not Connected"
+        }
+    }
 
-        // Phone Permissions
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED)
-            permissions.add(Manifest.permission.READ_PHONE_STATE)
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED)
-            permissions.add(Manifest.permission.READ_CALL_LOG)
+    override fun onResume() {
+        super.onResume()
+        updateScamCount()
+    }
 
-        // Notification Permission (Android 13+)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED)
-                permissions.add(Manifest.permission.POST_NOTIFICATIONS)
+    // ===== Permissions =====
+
+    private fun checkRequiredPermissions() {
+
+        if (!isNotificationServiceEnabled()) {
+            Toast.makeText(this, "Enable Notification Access", Toast.LENGTH_LONG).show()
+            startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
         }
 
-        // Request all permissions
-        if (permissions.isNotEmpty()) {
-            ActivityCompat.requestPermissions(this, permissions.toTypedArray(), PERMISSIONS_REQUEST_CODE)
-        }
-
-        // Overlay Permission Check
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
-            Log.w("Permissions", "Overlay permission not granted. Asking user.")
-            // ✅ FIX: Corrected the typo from MANGE to MANAGE
-            val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
+        if (!Settings.canDrawOverlays(this)) {
+            val intent = Intent(
+                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                Uri.parse("package:$packageName")
+            )
             startActivity(intent)
         }
     }
 
-    private fun dpToPx(dp: Int): Int {
-        val density = resources.displayMetrics.density
-        return (dp * density + 0.5f).toInt()
+    private fun isNotificationServiceEnabled(): Boolean {
+        val pkgName = packageName
+        val flat = Settings.Secure.getString(contentResolver, "enabled_notification_listeners")
+        return flat != null && flat.contains(pkgName)
     }
 }

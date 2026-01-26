@@ -39,6 +39,7 @@
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
 
+
     <application
         android:name=".App"
         android:allowBackup="true"
@@ -48,7 +49,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Material3.DayNight.NoActionBar"
         tools:targetApi="34">
-
+        <activity android:name=".ProfileActivity" />
         <!-- ✅ Login Activity (Launcher) -->
         <activity
             android:name=".LoginActivity"
