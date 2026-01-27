@@ -7,128 +7,131 @@ import android.os.Bundle
 import android.provider.Settings
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
+    // Firebase
+    private lateinit var auth: FirebaseAuth
+    private lateinit var authStateListener: FirebaseAuth.AuthStateListener
+    private lateinit var database: DatabaseReference
+
+    // Views
     private lateinit var viewAllVideosBtn: Button
     private lateinit var scamSummaryText: TextView
-
     private lateinit var wifiGuardBtn: LinearLayout
     private lateinit var checkLinkBtn: LinearLayout
     private lateinit var fraudNumberLookupBtn: LinearLayout
     private lateinit var appRiskScannerBtn: LinearLayout
     private lateinit var detailedReportBtn: Button
-
     private lateinit var profileBtn: ImageView
-
-    // 🔥 Device Status
     private lateinit var deviceStatusBar: LinearLayout
     private lateinit var deviceStatusText: TextView
-
-    // 🔥 Live Stats
     private lateinit var threatCountText: TextView
     private lateinit var lastSyncText: TextView
-
-    // 🔥 Firebase
-    private lateinit var database: DatabaseReference
-
-    // 👉 YOUR REAL SID (from screenshot)
-    private val deviceSID = "nDvU7cLlHc8cRKDEvt1HJCt0Zk2"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // ===== Bind Views =====
+        auth = FirebaseAuth.getInstance()
+
+        // Bind all views from the layout
+        bindViews()
+
+        // Setup click listeners for all buttons
+        setupClickListeners()
+
+        // This listener is the core of the app's logic. It waits for the user
+        // to be fully authenticated before trying to access the database.
+        setupAuthStateListener()
+
+        // Check for necessary app permissions after setup
+        checkRequiredPermissions()
+    }
+
+    private fun setupAuthStateListener() {
+        authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
+            val user = firebaseAuth.currentUser
+            if (user != null) {
+                // USER IS CONFIRMED - It is now 100% safe to access the database.
+                val userId = user.uid
+                // THE FIX: Point to the correct "profile" path, not "summary"
+                database = FirebaseDatabase.getInstance().reference
+                    .child("users")
+                    .child(userId)
+                    .child("profile")
+
+                listenToFirebaseData() // Read from the correct location
+                updateDeviceStatus(true)
+            } else {
+                // User is logged out.
+                updateDeviceStatus(false)
+            }
+        }
+    }
+
+    // Renamed for clarity, as we are now reading profile data.
+    private fun listenToFirebaseData() {
+        database.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (!snapshot.exists()) {
+                    threatCountText.text = "Could not find user profile."
+                    return
+                }
+
+                // Read the data that actually exists in the "profile" node
+                val name = snapshot.child("name").getValue(String::class.java) ?: "Guest"
+                val createdAtMillis = snapshot.child("created_at").getValue(Long::class.java) ?: 0
+                val accountCreationDate = if(createdAtMillis > 0) {
+                     SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(createdAtMillis))
+                } else {
+                    "--"
+                }
+
+                // Update the UI with the correct data
+                threatCountText.text = "Welcome back, $name!"
+                lastSyncText.text = "Account created: $accountCreationDate"
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(this@MainActivity, "Firebase Read Error.", Toast.LENGTH_SHORT).show()
+                updateDeviceStatus(false)
+            }
+        })
+    }
+
+    // Helper function to keep onCreate clean
+    private fun bindViews() {
         viewAllVideosBtn = findViewById(R.id.viewAllVideos)
         scamSummaryText = findViewById(R.id.scam_count_text)
-
         wifiGuardBtn = findViewById(R.id.wifi_guard)
         checkLinkBtn = findViewById(R.id.check_link)
         fraudNumberLookupBtn = findViewById(R.id.fraud_number_lookup)
         appRiskScannerBtn = findViewById(R.id.app_risk_scanner)
         detailedReportBtn = findViewById(R.id.detailed_report)
-
         profileBtn = findViewById(R.id.profileBtn)
-
         deviceStatusBar = findViewById(R.id.deviceStatusBar)
         deviceStatusText = findViewById(R.id.deviceStatusText)
-
         threatCountText = findViewById(R.id.threatCountText)
         lastSyncText = findViewById(R.id.lastSyncText)
-
-        // ===== Firebase Path =====
-        database = FirebaseDatabase.getInstance()
-            .reference
-            .child(deviceSID)
-            .child("summary")
-
-        checkRequiredPermissions()
-        listenToFirebaseSummary()
-
-        // ===== Click Listeners =====
-
-        viewAllVideosBtn.setOnClickListener {
-            Toast.makeText(this, "Security videos coming soon", Toast.LENGTH_SHORT).show()
-        }
-
-        wifiGuardBtn.setOnClickListener {
-            Toast.makeText(this, "Wifi Guard coming soon", Toast.LENGTH_SHORT).show()
-        }
-
-        checkLinkBtn.setOnClickListener {
-            Toast.makeText(this, "Link check coming soon", Toast.LENGTH_SHORT).show()
-        }
-
-        fraudNumberLookupBtn.setOnClickListener {
-            Toast.makeText(this, "Fraud number lookup coming soon", Toast.LENGTH_SHORT).show()
-        }
-
-        appRiskScannerBtn.setOnClickListener {
-            Toast.makeText(this, "App risk scanner coming soon", Toast.LENGTH_SHORT).show()
-        }
-
-        detailedReportBtn.setOnClickListener {
-            Toast.makeText(this, "Detailed report coming soon", Toast.LENGTH_SHORT).show()
-        }
-
-        profileBtn.setOnClickListener {
-            startActivity(Intent(this, ProfileActivity::class.java))
-        }
     }
 
-    // 🔥 LISTEN TO YOUR REAL SUMMARY NODE
-    private fun listenToFirebaseSummary() {
+    // Helper function to keep onCreate clean
+    private fun setupClickListeners() {
+        profileBtn.setOnClickListener { startActivity(Intent(this, ProfileActivity::class.java)) }
 
-        database.addValueEventListener(object : ValueEventListener {
-
-            override fun onDataChange(snapshot: DataSnapshot) {
-
-                if (!snapshot.exists()) {
-                    updateDeviceStatus(false)
-                    return
-                }
-
-                val files = snapshot.child("files").getValue(Int::class.java) ?: 0
-                val network = snapshot.child("network").getValue(Int::class.java) ?: 0
-                val processes = snapshot.child("processes").getValue(Int::class.java) ?: 0
-                val threats = snapshot.child("threats").getValue(Int::class.java) ?: 0
-                val updatedAt = snapshot.child("updatedAt").getValue(String::class.java) ?: "--"
-
-                updateDeviceStatus(true)
-
-                threatCountText.text =
-                    "🛡 Threats: $threats   📁 Files: $files\n🌐 Network: $network   ⚙ Processes: $processes"
-
-                lastSyncText.text = "🕒 Last Sync: $updatedAt"
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(this@MainActivity, "Firebase error", Toast.LENGTH_SHORT).show()
-                updateDeviceStatus(false)
-            }
-        })
+        // Placeholder toasts for features not yet implemented
+        val comingSoon = { Toast.makeText(this, "Feature coming soon", Toast.LENGTH_SHORT).show() }
+        viewAllVideosBtn.setOnClickListener { comingSoon() }
+        wifiGuardBtn.setOnClickListener { comingSoon() }
+        checkLinkBtn.setOnClickListener { comingSoon() }
+        fraudNumberLookupBtn.setOnClickListener { comingSoon() }
+        appRiskScannerBtn.setOnClickListener { comingSoon() }
+        detailedReportBtn.setOnClickListener { comingSoon() }
     }
 
     private fun updateScamCount() {
@@ -143,8 +146,18 @@ class MainActivity : AppCompatActivity() {
             deviceStatusText.text = "🟢 Device Connected"
         } else {
             deviceStatusBar.setBackgroundColor(0xFFFFEBEE.toInt())
-            deviceStatusText.text = "🔴 Device Not Connected"
+            deviceStatusText.text = "🔴 Device Not Connected. Restart app."
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        auth.addAuthStateListener(authStateListener)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        auth.removeAuthStateListener(authStateListener)
     }
 
     override fun onResume() {
@@ -152,27 +165,18 @@ class MainActivity : AppCompatActivity() {
         updateScamCount()
     }
 
-    // ===== Permissions =====
-
     private fun checkRequiredPermissions() {
-
         if (!isNotificationServiceEnabled()) {
-            Toast.makeText(this, "Enable Notification Access", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Please enable Notification Access for Secure Bharat", Toast.LENGTH_LONG).show()
             startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
         }
-
         if (!Settings.canDrawOverlays(this)) {
-            val intent = Intent(
-                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                Uri.parse("package:$packageName")
-            )
-            startActivity(intent)
+            startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
         }
     }
 
     private fun isNotificationServiceEnabled(): Boolean {
-        val pkgName = packageName
         val flat = Settings.Secure.getString(contentResolver, "enabled_notification_listeners")
-        return flat != null && flat.contains(pkgName)
+        return flat?.contains(packageName) ?: false
     }
 }

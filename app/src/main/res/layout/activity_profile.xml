@@ -22,7 +22,7 @@
         android:id="@+id/nameTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Aditya Khaire"
+        android:text="Loading..."
         android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="#333333"
@@ -32,7 +32,7 @@
         android:id="@+id/emailTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="adityakhair45@gmail.com"
+        android:text="Loading..."
         android:textSize="18sp"
         android:textColor="#666666"
         android:layout_marginBottom="24dp" />
@@ -41,7 +41,7 @@
         android:id="@+id/uidTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="UID: VHexaGc1jJaJp24yhDVW56u34CJ2"
+        android:text="UID: Loading..."
         android:textSize="14sp"
         android:textColor="#AAAAAA"
         android:layout_marginBottom="64dp" />
