@@ -14,12 +14,10 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    // Firebase
     private lateinit var auth: FirebaseAuth
     private lateinit var authStateListener: FirebaseAuth.AuthStateListener
     private lateinit var database: DatabaseReference
 
-    // Views
     private lateinit var viewAllVideosBtn: Button
     private lateinit var scamSummaryText: TextView
     private lateinit var wifiGuardBtn: LinearLayout
@@ -39,72 +37,72 @@ class MainActivity : AppCompatActivity() {
 
         auth = FirebaseAuth.getInstance()
 
-        // Bind all views from the layout
         bindViews()
-
-        // Setup click listeners for all buttons
         setupClickListeners()
-
-        // This listener is the core of the app's logic. It waits for the user
-        // to be fully authenticated before trying to access the database.
         setupAuthStateListener()
-
-        // Check for necessary app permissions after setup
         checkRequiredPermissions()
+    }
+
+    private fun setupClickListeners() {
+        // ✅ THIS IS CORRECT
+        profileBtn.setOnClickListener {
+            startActivity(Intent(this@MainActivity, ProfileActivity::class.java))
+        }
+
+        val comingSoon = {
+            Toast.makeText(this, "Feature coming soon", Toast.LENGTH_SHORT).show()
+        }
+
+        viewAllVideosBtn.setOnClickListener { comingSoon() }
+        wifiGuardBtn.setOnClickListener { comingSoon() }
+        checkLinkBtn.setOnClickListener { comingSoon() }
+        fraudNumberLookupBtn.setOnClickListener { comingSoon() }
+        appRiskScannerBtn.setOnClickListener { comingSoon() }
+        detailedReportBtn.setOnClickListener { comingSoon() }
     }
 
     private fun setupAuthStateListener() {
         authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
             val user = firebaseAuth.currentUser
             if (user != null) {
-                // USER IS CONFIRMED - It is now 100% safe to access the database.
-                val userId = user.uid
-                // THE FIX: Point to the correct "profile" path, not "summary"
                 database = FirebaseDatabase.getInstance().reference
                     .child("users")
-                    .child(userId)
+                    .child(user.uid)
                     .child("profile")
 
-                listenToFirebaseData() // Read from the correct location
+                listenToFirebaseData()
                 updateDeviceStatus(true)
             } else {
-                // User is logged out.
                 updateDeviceStatus(false)
             }
         }
     }
 
-    // Renamed for clarity, as we are now reading profile data.
     private fun listenToFirebaseData() {
         database.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (!snapshot.exists()) {
-                    threatCountText.text = "Could not find user profile."
+                    threatCountText.text = "Profile not found"
                     return
                 }
 
-                // Read the data that actually exists in the "profile" node
                 val name = snapshot.child("name").getValue(String::class.java) ?: "Guest"
-                val createdAtMillis = snapshot.child("created_at").getValue(Long::class.java) ?: 0
-                val accountCreationDate = if(createdAtMillis > 0) {
-                     SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(createdAtMillis))
-                } else {
-                    "--"
-                }
+                val createdAt = snapshot.child("created_at").getValue(Long::class.java) ?: 0L
 
-                // Update the UI with the correct data
+                val date = if (createdAt > 0)
+                    SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(createdAt))
+                else "--"
+
                 threatCountText.text = "Welcome back, $name!"
-                lastSyncText.text = "Account created: $accountCreationDate"
+                lastSyncText.text = "Account created: $date"
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(this@MainActivity, "Firebase Read Error.", Toast.LENGTH_SHORT).show()
-                updateDeviceStatus(false)
+                Toast.makeText(this@MainActivity, "Firebase error", Toast.LENGTH_SHORT).show()
             }
         })
     }
 
-    // Helper function to keep onCreate clean
     private fun bindViews() {
         viewAllVideosBtn = findViewById(R.id.viewAllVideos)
         scamSummaryText = findViewById(R.id.scam_count_text)
@@ -120,36 +118,6 @@ class MainActivity : AppCompatActivity() {
         lastSyncText = findViewById(R.id.lastSyncText)
     }
 
-    // Helper function to keep onCreate clean
-    private fun setupClickListeners() {
-        profileBtn.setOnClickListener { startActivity(Intent(this, ProfileActivity::class.java)) }
-
-        // Placeholder toasts for features not yet implemented
-        val comingSoon = { Toast.makeText(this, "Feature coming soon", Toast.LENGTH_SHORT).show() }
-        viewAllVideosBtn.setOnClickListener { comingSoon() }
-        wifiGuardBtn.setOnClickListener { comingSoon() }
-        checkLinkBtn.setOnClickListener { comingSoon() }
-        fraudNumberLookupBtn.setOnClickListener { comingSoon() }
-        appRiskScannerBtn.setOnClickListener { comingSoon() }
-        detailedReportBtn.setOnClickListener { comingSoon() }
-    }
-
-    private fun updateScamCount() {
-        val prefs = getSharedPreferences("SecureBharatPrefs", Context.MODE_PRIVATE)
-        val scamCount = prefs.getInt("scam_count", 0)
-        scamSummaryText.text = "📅 Last 7 Days: $scamCount scams blocked"
-    }
-
-    private fun updateDeviceStatus(isConnected: Boolean) {
-        if (isConnected) {
-            deviceStatusBar.setBackgroundColor(0xFFE8F5E9.toInt())
-            deviceStatusText.text = "🟢 Device Connected"
-        } else {
-            deviceStatusBar.setBackgroundColor(0xFFFFEBEE.toInt())
-            deviceStatusText.text = "🔴 Device Not Connected. Restart app."
-        }
-    }
-
     override fun onStart() {
         super.onStart()
         auth.addAuthStateListener(authStateListener)
@@ -162,21 +130,36 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        updateScamCount()
+        val prefs = getSharedPreferences("SecureBharatPrefs", Context.MODE_PRIVATE)
+        scamSummaryText.text = "📅 Last 7 Days: ${prefs.getInt("scam_count", 0)} scams blocked"
+    }
+
+    private fun updateDeviceStatus(isConnected: Boolean) {
+        if (isConnected) {
+            deviceStatusBar.setBackgroundColor(0xFFE8F5E9.toInt())
+            deviceStatusText.text = "🟢 Device Connected"
+        } else {
+            deviceStatusBar.setBackgroundColor(0xFFFFEBEE.toInt())
+            deviceStatusText.text = "🔴 Device Not Connected"
+        }
     }
 
     private fun checkRequiredPermissions() {
         if (!isNotificationServiceEnabled()) {
-            Toast.makeText(this, "Please enable Notification Access for Secure Bharat", Toast.LENGTH_LONG).show()
             startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
         }
         if (!Settings.canDrawOverlays(this)) {
-            startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
+            startActivity(
+                Intent(
+                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:$packageName")
+                )
+            )
         }
     }
 
     private fun isNotificationServiceEnabled(): Boolean {
         val flat = Settings.Secure.getString(contentResolver, "enabled_notification_listeners")
-        return flat?.contains(packageName) ?: false
+        return flat?.contains(packageName) == true
     }
 }

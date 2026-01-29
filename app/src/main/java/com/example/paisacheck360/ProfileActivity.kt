@@ -6,6 +6,7 @@ import android.provider.Settings
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.auth.FirebaseAuth
 
 class ProfileActivity : AppCompatActivity() {
 
@@ -13,34 +14,26 @@ class ProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
 
-        // 🔐 CHECK CUSTOM LOGIN (NOT FIREBASE)
-        val prefs = getSharedPreferences("SecureBharatPrefs", MODE_PRIVATE)
-        val isLoggedIn = prefs.getBoolean("is_logged_in", false)
-
-        if (!isLoggedIn) {
-            // User not logged in → go to login
+        // ✅ USE FIREBASE AUTH (NOT SharedPreferences)
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user == null) {
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
             return
         }
 
-        // ===== UI =====
-        val androidIdText = findViewById<TextView>(R.id.nameTextView)
-        val logoutBtn = findViewById<Button>(R.id.logoutButton)
+        val nameTextView = findViewById<TextView>(R.id.nameTextView)
+        val logoutButton = findViewById<Button>(R.id.logoutButton)
 
-        // Show Android ID (Secure ID)
         val androidID = Settings.Secure.getString(
             contentResolver,
             Settings.Secure.ANDROID_ID
         )
-        androidIdText.text = "Secure ID: $androidID"
 
-        // 🚪 MANUAL LOGOUT ONLY
-        logoutBtn.setOnClickListener {
-            prefs.edit()
-                .putBoolean("is_logged_in", false)
-                .apply()
+        nameTextView.text = "Secure ID: $androidID"
 
+        logoutButton.setOnClickListener {
+            FirebaseAuth.getInstance().signOut()
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
         }
