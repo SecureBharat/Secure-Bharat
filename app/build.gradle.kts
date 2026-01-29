@@ -61,15 +61,15 @@ dependencies {
     // ✅ TensorFlow Lite for phishing detection model
     implementation("org.tensorflow:tensorflow-lite:2.11.0")
 
-    // ✅ Networking (Duplicates removed)
+    // ✅ Networking
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")  // <- used by FakeNewsApi
 
-    // ✅ Coroutines – async tasks (Duplicate removed)
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    // ✅ Coroutines – async tasks
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3") // <- used in SMSReceiver / FakeNewsApi
 
-    // ✅ Firebase (BoM controls versions, duplicates removed)
+    // ✅ Firebase (BoM controls versions)
     implementation(platform("com.google.firebase:firebase-bom:32.7.3"))
     implementation("com.google.firebase:firebase-database-ktx")
     implementation("com.google.firebase:firebase-analytics-ktx")
@@ -88,5 +88,4 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-
 }

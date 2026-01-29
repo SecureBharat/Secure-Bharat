@@ -29,19 +29,22 @@ class CallPopupService : Service() {
     private var callerNumber: String = "Unknown"
     private lateinit var db: DatabaseReference
 
-    override fun onBind(intent: Intent?): IBinder? {
-        return null
-    }
+    override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onCreate() {
         super.onCreate()
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
 
-        val androidID = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID) ?: "guest"
+        val androidID =
+            Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID) ?: "guest"
 
-        // ❗️✅ FIX 1: Corrected URL (changed 'https.' to 'https://')
-        db = FirebaseDatabase.getInstance("https://sbtest-9acea-default-rtdb.firebaseio.com")
-            .reference.child("users").child(androidID).child("call_feedback")
+        // ✅ Use default Firebase instance – NO URL STRING ANYMORE
+        db = FirebaseDatabase
+            .getInstance()
+            .reference
+            .child("users")
+            .child(androidID)
+            .child("call_feedback")
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -53,11 +56,7 @@ class CallPopupService : Service() {
         }
 
         val numberFromIntent = intent?.getStringExtra("callerNumber")
-        callerNumber = if (numberFromIntent.isNullOrEmpty()) {
-            "Unknown"
-        } else {
-            numberFromIntent
-        }
+        callerNumber = if (numberFromIntent.isNullOrEmpty()) "Unknown" else numberFromIntent
 
         startInForeground()
 
@@ -88,15 +87,27 @@ class CallPopupService : Service() {
                 if (entryFound != null) {
                     val status = entryFound.child("status").getValue(String::class.java)
 
-                    if (status == "Scam") {
-                        Log.d("CallPopupService", "Number $number is a known scam. Showing alert.")
-                        showPopup(number, isKnownScam = true)
-                    } else if (status == "Safe") {
-                        Log.d("CallPopupService", "Number $number is known and safe. Ignoring.")
-                        stopSelf()
-                    } else {
-                        Log.d("CallPopupService", "Number $number found but status is '$status'. Showing popup.")
-                        showPopup(number, isKnownScam = false)
+                    when (status) {
+                        "Scam" -> {
+                            Log.d(
+                                "CallPopupService",
+                                "Number $number is a known scam. Showing alert."
+                            )
+                            showPopup(number, isKnownScam = true)
+                        }
+
+                        "Safe" -> {
+                            Log.d("CallPopupService", "Number $number is known and safe. Ignoring.")
+                            stopSelf()
+                        }
+
+                        else -> {
+                            Log.d(
+                                "CallPopupService",
+                                "Number $number found but status is '$status'. Showing popup."
+                            )
+                            showPopup(number, isKnownScam = false)
+                        }
                     }
                 } else {
                     Log.d("CallPopupService", "Number $number is not in DB. Showing popup.")
@@ -128,7 +139,8 @@ class CallPopupService : Service() {
                 } else {
                     WindowManager.LayoutParams.TYPE_PHONE
                 },
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                 PixelFormat.TRANSLUCENT
             )
             params.gravity = Gravity.CENTER
@@ -169,7 +181,10 @@ class CallPopupService : Service() {
                 if (Settings.canDrawOverlays(this)) {
                     windowManager.addView(view, params)
                 } else {
-                    Log.e("CallPopupService", "Error: SYSTEM_ALERT_WINDOW permission not granted!")
+                    Log.e(
+                        "CallPopupService",
+                        "Error: SYSTEM_ALERT_WINDOW permission not granted!"
+                    )
                 }
             } catch (e: Exception) {
                 Log.e("CallPopupService", "Error adding view to WindowManager", e)
@@ -195,17 +210,31 @@ class CallPopupService : Service() {
             return
         }
 
-        // ❗️✅ FIX 2: Corrected URL here as well
-        val dbRef = FirebaseDatabase.getInstance("https://sbtest-9acea-default-rtdb.firebaseio.com")
-            .reference.child("users").child(androidID).child("call_feedback")
+        // ✅ Also use default instance here – NO URL
+        val dbRef = FirebaseDatabase
+            .getInstance()
+            .reference
+            .child("users")
+            .child(androidID)
+            .child("call_feedback")
 
-        val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
-        val callData = mapOf("status" to feedback, "timestamp" to timestamp)
+        val timestamp = SimpleDateFormat(
+            "yyyy-MM-dd HH:mm:ss",
+            Locale.getDefault()
+        ).format(Date())
+
+        val callData = mapOf(
+            "status" to feedback,
+            "timestamp" to timestamp
+        )
+
         val safeNumberKey = number.replace(Regex("[.#$\\[\\]]"), "_")
 
         dbRef.child(safeNumberKey).setValue(callData)
             .addOnSuccessListener { Log.d("CallPopupService", "Feedback saved") }
-            .addOnFailureListener { e -> Log.e("CallPopupService", "Failed to save feedback", e) }
+            .addOnFailureListener { e ->
+                Log.e("CallPopupService", "Failed to save feedback", e)
+            }
     }
 
     private fun startInForeground() {
@@ -216,7 +245,8 @@ class CallPopupService : Service() {
                 "Call Popup Service",
                 NotificationManager.IMPORTANCE_LOW
             )
-            (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(channel)
+            (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
+                .createNotificationChannel(channel)
         }
 
         val notification: Notification = NotificationCompat.Builder(this, channelId)

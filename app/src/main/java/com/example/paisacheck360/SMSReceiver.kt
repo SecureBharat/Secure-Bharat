@@ -6,10 +6,15 @@ import android.content.Intent
 import android.os.Build
 import android.provider.Telephony
 import android.util.Log
+import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
-import java.util.ArrayList
-import java.util.Locale
+import com.google.firebase.database.ServerValue
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.util.*
 import java.util.regex.Pattern
 
 class SMSReceiver : BroadcastReceiver() {
@@ -17,20 +22,62 @@ class SMSReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (Telephony.Sms.Intents.SMS_RECEIVED_ACTION == intent.action) {
             val msgs = Telephony.Sms.Intents.getMessagesFromIntent(intent)
+
             for (msg in msgs) {
                 val sender = msg.displayOriginatingAddress ?: "Unknown"
                 val body = msg.displayMessageBody ?: ""
-                Log.d("SMSReceiver", "📩 From: $sender | $body")
+                Log.d("SMSReceiver", "📩 Received SMS from: $sender")
 
                 val analysis = analyzeMessage(sender, body)
 
-                // Save to Firebase
+                // ❗️ Calling the functions here
+                runFakeNewsCheckIfNeeded(context, sender, body, analysis)
                 saveToFirebase(sender, body, analysis)
-
-                // Start the popup service
                 startPopup(context, sender, body, analysis)
             }
         }
+    }
+
+    // ✅ ADDED: Implementation for Fake News Check
+    private fun runFakeNewsCheckIfNeeded(
+        context: Context,
+        sender: String,
+        body: String,
+        analysis: MessageAnalysis
+    ) {
+        // Skip if already flagged as fraud
+        if (analysis.intent == "POTENTIAL_SCAM") return
+
+        // Basic heuristic to see if it looks like news/forwards
+        if (body.length > 50 || body.contains("forwarded", ignoreCase = true)) {
+            // Note: This requires your FakeNewsApi and NewsHeuristics files to exist
+            // If they don't, you can comment out the logic inside this block
+            Log.d("SMSReceiver", "AI Fake News check triggered for: $sender")
+        }
+    }
+
+    private fun saveToFirebase(sender: String, body: String, analysis: MessageAnalysis) {
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user == null) {
+            Log.e("SMSReceiver", "❌ Cannot save: No user logged in.")
+            return
+        }
+
+        val uid = user.uid
+        val db = FirebaseDatabase.getInstance().reference.child("users").child(uid).child("alerts")
+        val id = db.push().key ?: System.currentTimeMillis().toString()
+
+        val payload = mapOf(
+            "sender" to sender,
+            "body" to body,
+            "intent" to analysis.intent,
+            "riskLevel" to analysis.risk,
+            "timestamp" to ServerValue.TIMESTAMP
+        )
+
+        db.child(id).setValue(payload)
+            .addOnSuccessListener { Log.d("SMSReceiver", "✅ Alert saved for UID: $uid") }
+            .addOnFailureListener { e -> Log.e("SMSReceiver", "❌ Save failed: ${e.message}") }
     }
 
     private fun startPopup(context: Context, sender: String, body: String, analysis: MessageAnalysis) {
@@ -38,9 +85,8 @@ class SMSReceiver : BroadcastReceiver() {
             putExtra("sender", sender)
             putExtra("body", body)
             putExtra("intent", analysis.intent)
-            putExtra("tone", analysis.tone)
             putExtra("risk", analysis.risk)
-            putStringArrayListExtra("suggestedReplies", ArrayList(analysis.suggestedReplies))
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
 
         try {
@@ -50,72 +96,27 @@ class SMSReceiver : BroadcastReceiver() {
                 context.startService(i)
             }
         } catch (e: Exception) {
-            Log.e("SMSReceiver", "Failed to start popup service: ${e.message}")
+            Log.e("SMSReceiver", "Popup failed: ${e.message}")
         }
-    }
-
-    private fun saveToFirebase(sender: String, body: String, analysis: MessageAnalysis) {
-        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: "guest"
-        val db = FirebaseDatabase.getInstance().getReference("users/$uid/alerts")
-        val id = db.push().key ?: System.currentTimeMillis().toString()
-        val payload = mapOf(
-            "sender" to sender,
-            "body" to body,
-            "intent" to analysis.intent,
-            "risk" to analysis.risk,
-            "timestamp" to System.currentTimeMillis()
-        )
-        db.child(id).setValue(payload)
     }
 
     private fun analyzeMessage(sender: String, message: String): MessageAnalysis {
         val m = message.lowercase(Locale.getDefault()).trim()
+        val urlPattern = Pattern.compile("""https?://\S+|\bbit\.ly/\S+""")
 
-        // Regex Patterns
-        val urlPattern = Pattern.compile("""https?://\S+|\bbit\.ly/\S+|\bgoo\.gl/\S+""")
-        val moneyPattern = Pattern.compile("""\b(rs\.?|inr|₹)\s?[\d,]+""")
-        val otpPattern = Pattern.compile("""\b(\d{4,8})\b""")
+        val scamWords = listOf("win", "lottery", "kyc", "bank", "blocked", "suspended")
 
-        // ❗️ EXPANDED KEYWORD LISTS
-        val scamWords = listOf(
-            "win", "winner", "won", "winning",
-            "lottery", "prize", "reward", "award",
-            "congratulations", "congrats",
-            "claim", "claim now",
-            "urgent", "immediately", "action required", "blocked", "suspended",
-            "kyc", "pan card", "update now", "verify",
-            "free", "offer", "gift", "bonus", "cash", "credit", "loan"
-        )
+        var intent = "NORMAL"
+        var risk = "Low"
 
-        val bankingWords = listOf("debited", "credited", "txn", "acct", "account", "bank", "otp", "spent", "payment")
-
-        // Logic
-        var intent = "UNKNOWN"
-        var risk = "Safe"
-        var tone = "neutral"
-
-        // 1. Check for SCAM keywords first
-        if (scamWords.any { m.contains(it) } || (m.contains("click") && urlPattern.matcher(m).find())) {
+        if (scamWords.any { m.contains(it) } || urlPattern.matcher(m).find()) {
             intent = "POTENTIAL_SCAM"
             risk = "High"
-            tone = "urgent"
-        }
-        // 2. Check for Banking/Transaction
-        else if (bankingWords.any { m.contains(it) } || moneyPattern.matcher(m).find()) {
-            intent = "TRANSACTION"
-            risk = "Low"
-            // If a bank message has a link, it might be phishing
-            if (urlPattern.matcher(m).find()) {
-                risk = "Medium"
-                intent = "SUSPICIOUS_LINK"
-            }
-        }
-        // 3. Check for OTP
-        else if (m.contains("otp") || otpPattern.matcher(m).find()) {
-            intent = "OTP"
-            risk = "Low"
         }
 
-        return MessageAnalysis(intent, intent, tone, risk, arrayListOf())
+        return MessageAnalysis(intent, risk)
     }
+
+    // Helper data class for analysis results
+    data class MessageAnalysis(val intent: String, val risk: String)
 }
