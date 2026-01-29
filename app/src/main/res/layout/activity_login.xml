@@ -61,6 +61,7 @@
 
         <!-- Username Field -->
         <EditText
+            android:id="@+id/emailInput"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:hint="Username or Email"

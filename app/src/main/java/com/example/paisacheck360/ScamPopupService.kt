@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.IBinder
 import android.view.*
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 
 class ScamPopupService : Service() {
@@ -29,6 +30,7 @@ class ScamPopupService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     // ✅ FOREGROUND NOTIFICATION (MANDATORY)
+    @RequiresApi(Build.VERSION_CODES.ECLAIR)
     private fun startForegroundServiceProperly() {
 
         val channelId = "scam_popup_channel"

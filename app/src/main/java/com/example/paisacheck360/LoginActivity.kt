@@ -1,149 +1,113 @@
 package com.example.paisacheck360
 
-
-
-import android.annotation.SuppressLint
-
 import android.content.Intent
-
 import android.os.Bundle
-
-import android.widget.*
-
+import android.widget.Button
+import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-
-import android.provider.Settings
-
-import java.security.MessageDigest
-
-import com.google.firebase.database.*
-
-
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 
 class LoginActivity : AppCompatActivity() {
 
+    private lateinit var auth: FirebaseAuth
 
-
-    private lateinit var database: DatabaseReference
-
-    private lateinit var androidID: String
-
-
-
-    @SuppressLint("MissingInflatedId")
+    private lateinit var emailInput: EditText
+    private lateinit var passwordInput: EditText
+    private lateinit var loginBtn: Button
+    private lateinit var registerBtn: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
         super.onCreate(savedInstanceState)
-
         setContentView(R.layout.activity_login)
 
+        auth = FirebaseAuth.getInstance()
 
-
-// Get Android ID
-
-        androidID = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
-
-
-
-// Firebase DB
-
-        database = FirebaseDatabase.getInstance().reference.child("users")
-
-
-
-        val passwordInput = findViewById<EditText>(R.id.passwordInput)
-
-        val loginBtn = findViewById<Button>(R.id.loginBtn)
-
-        val resetBtn = findViewById<Button>(R.id.registerBtn)
-
-
-
-        loginBtn.setOnClickListener {
-
-            val password = passwordInput.text.toString()
-
-            if (password.isNotEmpty()) {
-
-                val hashed = hashPassword(password)
-
-
-
-// Check in Firebase
-
-                database.child(androidID).get().addOnSuccessListener {
-
-                    if (it.exists()) {
-
-                        val savedHash = it.child("passwordHash").value.toString()
-
-                        if (savedHash == hashed) {
-
-                            Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show()
-
-                            startActivity(Intent(this,MainActivity::class.java))
-
-                            finish()
-
-                        } else {
-
-                            Toast.makeText(this, "Wrong password!", Toast.LENGTH_SHORT).show()
-
-                        }
-
-                    } else {
-
-// First time user → save hash
-
-                        database.child(androidID).child("passwordHash").setValue(hashed)
-
-                        Toast.makeText(this, "Account created!", Toast.LENGTH_SHORT).show()
-
-                        startActivity(Intent(this, MainActivity::class.java))
-
-                        finish()
-
-                    }
-
-                }
-
-            } else {
-
-                Toast.makeText(this, "Enter a password!", Toast.LENGTH_SHORT).show()
-
-            }
-
+        // Auto login
+        if (auth.currentUser != null) {
+            goMain()
+            return
         }
 
+        emailInput = findViewById(R.id.emailInput)
+        passwordInput = findViewById(R.id.passwordInput)
+        loginBtn = findViewById(R.id.loginBtn)
+        registerBtn = findViewById(R.id.registerBtn)
 
+        loginBtn.setOnClickListener { loginUser() }
+        registerBtn.setOnClickListener { registerUser() }
+    }
 
-// Reset password
+    // ---------------- LOGIN ----------------
+    private fun loginUser() {
+        val email = emailInput.text.toString().trim()
+        val password = passwordInput.text.toString().trim()
 
-        resetBtn.setOnClickListener {
-
-            passwordInput.setText("")
-
-            database.child(androidID).removeValue().addOnSuccessListener {
-
-                Toast.makeText(this, "Password reset. Enter new password.", Toast.LENGTH_SHORT).show()
-
-            }
-
+        if (email.isEmpty() || password.isEmpty()) {
+            toast("Enter email & password")
+            return
         }
 
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnSuccessListener {
+                toast("Login successful")
+                goMain()
+            }
+            .addOnFailureListener {
+                toast("Login failed: ${it.message}")
+            }
     }
 
+    // ---------------- REGISTER ----------------
+    private fun registerUser() {
+        val email = emailInput.text.toString().trim()
+        val password = passwordInput.text.toString().trim()
 
+        if (email.isEmpty() || password.isEmpty()) {
+            toast("Enter email & password")
+            return
+        }
 
-    private fun hashPassword(password: String): String {
+        if (password.length < 6) {
+            toast("Password must be at least 6 characters")
+            return
+        }
 
-        val digest = MessageDigest.getInstance("SHA-256")
-
-        val hashBytes = digest.digest(password.toByteArray())
-
-        return hashBytes.joinToString("") { "%02x".format(it) }
-
+        auth.createUserWithEmailAndPassword(email, password)
+            .addOnSuccessListener {
+                createUserProfile()
+                toast("Registration successful")
+                goMain()
+            }
+            .addOnFailureListener {
+                toast("Register failed: ${it.message}")
+            }
     }
 
+    // ---------------- SAVE SID PROFILE ----------------
+    private fun createUserProfile() {
+        val user = auth.currentUser ?: return
+        val sid = user.uid   // 🔥 THIS IS YOUR SECURE ID
+
+        val profile = mapOf(
+            "sid" to sid,
+            "email" to user.email,
+            "created_at" to System.currentTimeMillis()
+        )
+
+        FirebaseDatabase.getInstance().reference
+            .child("users")
+            .child(sid)
+            .setValue(profile)
+    }
+
+    private fun goMain() {
+        startActivity(Intent(this, MainActivity::class.java))
+        finish()
+    }
+
+    private fun toast(msg: String) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+    }
 }
