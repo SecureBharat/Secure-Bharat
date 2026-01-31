@@ -1,470 +1,213 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5"
-    android:padding="16dp"
-    android:scrollbars="vertical">
+    android:background="#1E3A8A">
+
+    <RelativeLayout
+        android:id="@+id/topBar"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="#1A337E"
+        android:paddingHorizontal="16dp"
+        android:elevation="4dp">
+
+        <ImageView
+            android:id="@+id/menuIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_menu"
+            app:tint="@android:color/white" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Secure Bharat"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/profileBtn"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_notification"
+            android:background="@drawable/bg_notification_badge" />
+    </RelativeLayout>
 
     <LinearLayout
+        android:id="@+id/bottomNav"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/bg_bottom_nav"
+        android:orientation="horizontal"
+        android:paddingVertical="8dp"
+        android:elevation="12dp">
 
-
-        <!-- 🔥 TOP HEADER : TITLE + PROFILE -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:paddingBottom="20dp">
-
-            <TextView
-                android:id="@+id/appTitle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:drawableStart="@drawable/ic_shield"
-                android:drawablePadding="12dp"
-                android:text="Secure Bharat"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                android:textColor="#1565C0"
-                android:gravity="center_vertical" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="🇮🇳"
-                android:textSize="20sp"
-                android:layout_marginEnd="8dp" />
-
-            <ImageView
-                android:id="@+id/profileBtn"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:src="@drawable/ic_profile"
-                android:contentDescription="Profile"
-                android:padding="6dp" />
+        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center">
+            <ImageView android:layout_width="26dp" android:layout_height="26dp" android:src="@drawable/ic_home" app:tint="#1E3A8A" />
         </LinearLayout>
-
-        <!-- 🟢🔴 DEVICE STATUS BAR -->
-        <LinearLayout
-            android:id="@+id/deviceStatusBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:padding="10dp"
-            android:layout_marginBottom="14dp"
-            android:background="#E8F5E9">
-
-            <TextView
-                android:id="@+id/deviceStatusText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="🟢 Connected to Veghna Antivirus"
-                android:textStyle="bold"
-                android:textSize="13sp"
-                android:textColor="#2E7D32"/>
+        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center">
+            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_grid" app:tint="#9CA3AF" />
         </LinearLayout>
+        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center">
+            <ImageView android:layout_width="30dp" android:layout_height="30dp" android:src="@drawable/ic_add_circle" app:tint="#9CA3AF" />
+        </LinearLayout>
+        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center">
+            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_document" app:tint="#9CA3AF" />
+        </LinearLayout>
+        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center">
+            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_stats" app:tint="#9CA3AF" />
+        </LinearLayout>
+    </LinearLayout>
 
-        <!-- 🔥 Live Device Stats -->
-        <LinearLayout
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/topBar"
+        android:layout_above="@id/bottomNav"
+        android:layout_marginTop="8dp"
+        app:cardCornerRadius="28dp"
+        app:cardElevation="12dp">
+
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/bg_card"
-            android:padding="20dp"
-            android:layout_marginBottom="16dp"
-            android:elevation="4dp">
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_main_card_gradient"
+            android:scrollbars="none">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingBottom="12dp">
+                android:orientation="vertical"
+                android:paddingTop="20dp"
+                android:paddingHorizontal="16dp"
+                android:paddingBottom="24dp">
 
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="🛰️ Live Device Stats"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="#0D47A1" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="📡"
-                    android:textSize="16sp" />
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/threatCountText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Loading stats..."
-                android:textSize="15sp"
-                android:textColor="#333333"
-                android:lineSpacingExtra="4dp"
-                android:paddingBottom="8dp" />
-
-            <TextView
-                android:id="@+id/lastSyncText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="🕒 Last Sync: --"
-                android:textSize="14sp"
-                android:textColor="#666666" />
-        </LinearLayout>
-
-        <!-- Learn to Stay Safe Section -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_card"
-            android:orientation="vertical"
-            android:padding="20dp"
-            android:layout_marginBottom="16dp"
-            android:elevation="4dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingBottom="16dp">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="📚 Learn to Stay Safe"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="#0D47A1" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="🎯"
-                    android:textSize="16sp" />
-            </LinearLayout>
-
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:scrollbars="none"
-                android:layout_marginBottom="16dp">
+                <RelativeLayout android:layout_width="match_parent" android:layout_height="52dp">
+                    <TextView
+                        android:id="@+id/threatCountText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="Welcome back, Aditya 👍"
+                        android:textColor="#1F2937"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+                    <ImageView
+                        android:id="@+id/detailed_report"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:src="@drawable/ic_arrow_right"
+                        app:tint="#9CA3AF" />
+                </RelativeLayout>
 
                 <LinearLayout
-                    android:id="@+id/videoContainer"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingStart="4dp"
-                    android:paddingEnd="4dp" />
-            </HorizontalScrollView>
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/bg_protected_gradient"
+                    android:gravity="center"
+                    android:padding="18dp">
+                    <ImageView android:layout_width="26dp" android:layout_height="26dp" android:src="@drawable/ic_shield_check" app:tint="@android:color/white" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="10dp" android:text="Your Device is Protected" android:textColor="@android:color/white" android:textSize="17sp" android:textStyle="bold" />
+                </LinearLayout>
 
-            <Button
-                android:id="@+id/viewAllVideos"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:text="🎬 View All Security Videos"
-                android:textColor="#000000"
-                android:textStyle="bold"
-                android:textSize="14sp"
-                android:backgroundTint="#FFC107"
-                android:drawablePadding="8dp"
-                android:elevation="2dp" />
-        </LinearLayout>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="18dp">
+                    <LinearLayout
+                        android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="8dp"
+                        android:background="@drawable/bg_stat_card_3d" android:orientation="vertical" android:padding="14dp">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Threats Detected:" android:textSize="12sp" android:textColor="#6B7280" />
+                        <TextView android:id="@+id/lastSyncText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🛡️ • 3" android:textSize="26sp" android:textStyle="bold" />
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="8dp"
+                        android:background="@drawable/bg_stat_card_3d" android:orientation="vertical" android:padding="14dp">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Alerts Count:" android:textSize="12sp" android:textColor="#6B7280" />
+                        <TextView android:id="@+id/scam_count_text" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="46" android:textColor="#EF4444" android:textSize="26sp" android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
 
-        <!-- Quick Security Tools Section -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/bg_card"
-            android:padding="20dp"
-            android:layout_marginBottom="16dp"
-            android:elevation="4dp">
+                <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="24dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Security Tools" android:textSize="20sp" android:textStyle="bold" />
+                    <ImageView
+                        android:id="@+id/viewAllVideos"
+                        android:layout_width="40dp" android:layout_height="40dp"
+                        android:layout_alignParentEnd="true"
+                        android:background="@drawable/bg_circle_green_3d"
+                        android:padding="11dp"
+                        android:src="@drawable/ic_arrow_up"
+                        app:tint="@android:color/white" />
+                </RelativeLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingBottom="16dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:layout_marginTop="12dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="12dp">
+                        <LinearLayout
+                            android:id="@+id/app_risk_scanner"
+                            android:layout_width="0dp" android:layout_height="90dp" android:layout_weight="1" android:layout_marginEnd="8dp"
+                            android:background="@drawable/bg_tool_card_3d" android:gravity="center_vertical" android:padding="12dp">
+                            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:background="@drawable/bg_circle_orange_3d" android:padding="10dp" android:src="@drawable/ic_qr_scan" app:tint="@android:color/white" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:text="App Risk" android:textStyle="bold" />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:id="@+id/check_link"
+                            android:layout_width="0dp" android:layout_height="90dp" android:layout_weight="1" android:layout_marginStart="8dp"
+                            android:background="@drawable/bg_tool_card_3d" android:gravity="center_vertical" android:padding="12dp">
+                            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:background="@drawable/bg_circle_blue_3d" android:padding="10dp" android:src="@drawable/ic_link_check" app:tint="@android:color/white" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:text="Link Check" android:textStyle="bold" />
+                        </LinearLayout>
+                    </LinearLayout>
 
-                <TextView
-                    android:layout_width="0dp"
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <LinearLayout
+                            android:id="@+id/fraud_number_lookup"
+                            android:layout_width="0dp" android:layout_height="90dp" android:layout_weight="1" android:layout_marginEnd="8dp"
+                            android:background="@drawable/bg_tool_card_3d" android:gravity="center_vertical" android:padding="12dp">
+                            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:background="@drawable/bg_circle_blue_3d" android:padding="10dp" android:src="@drawable/ic_phone_search" app:tint="@android:color/white" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:text="Fraud Num" android:textStyle="bold" />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:id="@+id/wifi_guard"
+                            android:layout_width="0dp" android:layout_height="90dp" android:layout_weight="1" android:layout_marginStart="8dp"
+                            android:background="@drawable/bg_tool_card_3d" android:gravity="center_vertical" android:padding="12dp">
+                            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:background="@drawable/bg_circle_blue_3d" android:padding="10dp" android:src="@drawable/ic_ocr" app:tint="@android:color/white" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:text="WiFi Guard" android:textStyle="bold" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <RelativeLayout
+                    android:id="@+id/deviceStatusBar"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="🔧 Quick Security Tools"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="#0D47A1" />
+                    android:layout_marginTop="20dp">
+                    <ImageView
+                        android:layout_width="70dp" android:layout_height="70dp"
+                        android:src="@drawable/ic_shield_large"
+                        android:elevation="6dp" />
+                    <LinearLayout
+                        android:layout_width="match_parent" android:layout_height="60dp"
+                        android:layout_marginStart="40dp" android:layout_centerVertical="true"
+                        android:background="@drawable/bg_antivirus_3d" android:gravity="center_vertical" android:paddingStart="40dp">
+                        <TextView
+                            android:id="@+id/deviceStatusText"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Secure Anti-Virus Connected"
+                            android:textColor="@android:color/white"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </RelativeLayout>
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="⚡"
-                    android:textSize="16sp" />
             </LinearLayout>
+        </ScrollView>
+    </androidx.cardview.widget.CardView>
 
-            <LinearLayout
-                android:id="@+id/wifi_guard"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_marginBottom="12dp"
-                android:background="@drawable/btn_outline"
-                android:gravity="center"
-                android:orientation="horizontal"
-                android:padding="12dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:elevation="2dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="🔍"
-                    android:textSize="20sp"
-                    android:layout_marginEnd="12dp" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Wifi Guard"
-                    android:textColor="#1565C0"
-                    android:textStyle="bold"
-                    android:textSize="16sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="▶"
-                    android:textColor="#1565C0"
-                    android:textSize="14sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/check_link"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_marginBottom="12dp"
-                android:background="@drawable/btn_outline"
-                android:gravity="center"
-                android:orientation="horizontal"
-                android:padding="12dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:elevation="2dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="🔗"
-                    android:textSize="20sp"
-                    android:layout_marginEnd="12dp" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Check Suspicious Links"
-                    android:textColor="#1565C0"
-                    android:textStyle="bold"
-                    android:textSize="16sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="▶"
-                    android:textColor="#1565C0"
-                    android:textSize="14sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/fraud_number_lookup"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_marginBottom="12dp"
-                android:background="@drawable/btn_outline"
-                android:gravity="center"
-                android:orientation="horizontal"
-                android:padding="12dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:elevation="2dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="📞"
-                    android:textSize="20sp"
-                    android:layout_marginEnd="12dp" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Fraud Number Lookup"
-                    android:textColor="#1565C0"
-                    android:textStyle="bold"
-                    android:textSize="16sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="▶"
-                    android:textColor="#1565C0"
-                    android:textSize="14sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/app_risk_scanner"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_marginTop="12dp"
-                android:background="@drawable/btn_outline"
-                android:clickable="true"
-                android:elevation="2dp"
-                android:focusable="true"
-                android:gravity="center"
-                android:orientation="horizontal"
-                android:padding="12dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="12dp"
-                    android:text="📱"
-                    android:textSize="20sp" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="App Risk Scanner"
-                    android:textColor="#1565C0"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="▶"
-                    android:textColor="#1565C0"
-                    android:textSize="14sp" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- Scam Summary Section -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            android:background="@drawable/bg_card"
-            android:elevation="4dp"
-            android:orientation="vertical"
-            android:padding="20dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingBottom="12dp">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="📊 Security Summary"
-                    android:textColor="#0D47A1"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="🛡️"
-                    android:textSize="16sp" />
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/scam_count_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingBottom="8dp"
-                android:text="📅 Last 7 Days: 0 scams blocked"
-                android:textSize="15sp"
-                android:textColor="#333333" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="📧 SMS scams: 0 blocked\n💳 UPI scams: 0 flagged\n🔒 Links checked: 0"
-                android:textSize="14sp"
-                android:lineSpacingExtra="4dp"
-                android:textColor="#666666"
-                android:paddingBottom="16dp" />
-
-            <Button
-                android:id="@+id/detailed_report"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:backgroundTint="#4CAF50"
-                android:text="📋 View Detailed Security Report"
-                android:textColor="#FFFFFF"
-                android:textStyle="bold"
-                android:textSize="14sp"
-                android:elevation="2dp" />
-
-            <Button
-                android:id="@+id/viewLogsBtn"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginTop="12dp"
-                android:backgroundTint="#3F51B5"
-                android:text="📜 View Scam Logs"
-                android:textColor="#FFFFFF"
-                android:textStyle="bold"
-                android:textSize="14sp"
-                android:elevation="2dp" />
-        </LinearLayout>
-
-        <!-- Footer -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:padding="16dp"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/scam_latest_headline"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Latest scam: None"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:paddingBottom="4dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="🇮🇳 Made in India • Stay Safe Digital 🔐"
-                android:textSize="12sp"
-                android:textColor="#666666"
-                android:gravity="center" />
-        </LinearLayout>
-
-    </LinearLayout>
-</ScrollView>
+</RelativeLayout>
