@@ -5,12 +5,13 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
-import android.widget.*
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
-import java.text.SimpleDateFormat
-import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -19,18 +20,16 @@ class MainActivity : AppCompatActivity() {
     private lateinit var database: DatabaseReference
 
     // Views
-    private lateinit var viewAllVideosBtn: ImageView // Changed to ImageView to match XML
-    private lateinit var scamSummaryText: TextView
+    private lateinit var viewAllVideosBtn: ImageView
+    private lateinit var scamCountText: TextView
+    private lateinit var welcomeText: TextView
     private lateinit var wifiGuardBtn: LinearLayout
     private lateinit var checkLinkBtn: LinearLayout
     private lateinit var fraudNumberLookupBtn: LinearLayout
     private lateinit var appRiskScannerBtn: LinearLayout
-    private lateinit var detailedReportBtn: ImageView // Changed to ImageView to match XML
+    private lateinit var detailedReportBtn: ImageView
     private lateinit var profileBtn: ImageView
-    private lateinit var deviceStatusBar: RelativeLayout // Changed to RelativeLayout to match XML
-    private lateinit var deviceStatusText: TextView
-    private lateinit var threatCountText: TextView
-    private lateinit var lastSyncText: TextView
+    private lateinit var threatsDetectedText: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,19 +43,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun bindViews() {
-        // Matches the IDs added to activity_main.xml
         viewAllVideosBtn = findViewById(R.id.viewAllVideos)
-        scamSummaryText = findViewById(R.id.scam_count_text)
+        scamCountText = findViewById(R.id.scam_count_text)
+        welcomeText = findViewById(R.id.welcomeText)
         wifiGuardBtn = findViewById(R.id.wifi_guard)
         checkLinkBtn = findViewById(R.id.check_link)
         fraudNumberLookupBtn = findViewById(R.id.fraud_number_lookup)
         appRiskScannerBtn = findViewById(R.id.app_risk_scanner)
         detailedReportBtn = findViewById(R.id.detailed_report)
         profileBtn = findViewById(R.id.profileBtn)
-        deviceStatusBar = findViewById(R.id.deviceStatusBar)
-        deviceStatusText = findViewById(R.id.deviceStatusText)
-        threatCountText = findViewById(R.id.threatCountText)
-        lastSyncText = findViewById(R.id.lastSyncText)
+        threatsDetectedText = findViewById(R.id.threats_detected_text)
     }
 
     private fun setupClickListeners() {
@@ -79,9 +75,8 @@ class MainActivity : AppCompatActivity() {
                 database = FirebaseDatabase.getInstance().reference
                     .child("users").child(user.uid).child("profile")
                 listenToFirebaseData()
-                updateDeviceStatus(true)
             } else {
-                updateDeviceStatus(false)
+                welcomeText.text = "Welcome back, Guest!"
             }
         }
     }
@@ -90,15 +85,14 @@ class MainActivity : AppCompatActivity() {
         database.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (!snapshot.exists()) {
-                    threatCountText.text = "Welcome back, Guest!"
+                    welcomeText.text = "Welcome back, Guest!"
                     return
                 }
                 val name = snapshot.child("name").getValue(String::class.java) ?: "Guest"
-                threatCountText.text = "Welcome back, $name!"
-                // You can add more profile logic here if needed
+                welcomeText.text = "Welcome back, $name 👋"
             }
             override fun onCancelled(error: DatabaseError) {
-                updateDeviceStatus(false)
+                welcomeText.text = "Welcome back, Guest!"
             }
         })
     }
@@ -106,15 +100,8 @@ class MainActivity : AppCompatActivity() {
     private fun updateScamCount() {
         val prefs = getSharedPreferences("SecureBharatPrefs", Context.MODE_PRIVATE)
         val scamCount = prefs.getInt("scam_count", 0)
-        scamSummaryText.text = scamCount.toString()
-    }
-
-    private fun updateDeviceStatus(isConnected: Boolean) {
-        if (isConnected) {
-            deviceStatusText.text = "Connected to Secure Anti-Virus"
-        } else {
-            deviceStatusText.text = "🔴 Not Protected. Sign in."
-        }
+        scamCountText.text = scamCount.toString()
+        threatsDetectedText.text = scamCount.toString() // Corrected: No Emoji!
     }
 
     private fun checkRequiredPermissions() {
