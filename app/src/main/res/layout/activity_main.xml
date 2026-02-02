@@ -4,302 +4,604 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F3F4F6"
+    android:background="#F8F9FA"
     tools:context=".MainActivity">
-
-    <!-- Top Bar -->
-    <RelativeLayout
-        android:id="@+id/topBar"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="#2563EB"
-        android:paddingHorizontal="16dp"
-        android:elevation="4dp">
-
-        <ImageView
-            android:id="@+id/menuIcon"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:layout_centerVertical="true"
-            android:src="@drawable/ic_menu" 
-            app:tint="@android:color/white" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="Secure Bharat"
-            android:textColor="@android:color/white"
-            android:textSize="20sp"
-            android:fontFamily="sans-serif-medium"
-            android:textStyle="bold" />
-
-        <ImageView
-            android:id="@+id/profileBtn"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:src="@drawable/ic_profile"
-            app:tint="@android:color/white" />
-    </RelativeLayout>
 
     <!-- Bottom Navigation Bar -->
     <LinearLayout
         android:id="@+id/bottomNav"
         android:layout_width="match_parent"
-        android:layout_height="68dp"
+        android:layout_height="72dp"
         android:layout_alignParentBottom="true"
-        android:background="@drawable/bg_bottom_nav"
+        android:background="@drawable/bg_bottom_nav_modern"
         android:orientation="horizontal"
         android:gravity="center"
         android:layout_marginHorizontal="16dp"
         android:layout_marginBottom="16dp"
         android:paddingVertical="8dp"
-        android:elevation="20dp">
+        android:elevation="24dp">
 
-        <LinearLayout android:id="@+id/nav_home" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
-            <ImageView android:layout_width="26dp" android:layout_height="26dp" android:src="@drawable/ic_home" app:tint="@color/icon_active" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Home" android:textColor="@color/icon_active" android:textSize="12sp" android:layout_marginTop="4dp"/>
-        </LinearLayout>
-        <LinearLayout android:id="@+id/nav_tools" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
-            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_grid" app:tint="@color/icon_inactive" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tools" android:textColor="@color/icon_inactive" android:textSize="12sp" android:layout_marginTop="4dp"/>
-        </LinearLayout>
-        <LinearLayout android:id="@+id/nav_scan" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
-            <ImageView android:layout_width="30dp" android:layout_height="30dp" android:src="@drawable/ic_add_circle" app:tint="@color/icon_inactive" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Scan" android:textColor="@color/icon_inactive" android:textSize="12sp" android:layout_marginTop="4dp"/>
-        </LinearLayout>
-        <LinearLayout android:id="@+id/nav_report" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
-            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_document" app:tint="@color/icon_inactive" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Report" android:textColor="@color/icon_inactive" android:textSize="12sp" android:layout_marginTop="4dp"/>
-        </LinearLayout>
-        <LinearLayout android:id="@+id/nav_stats" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
-            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_stats" app:tint="@color/icon_inactive" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Stats" android:textColor="@color/icon_inactive" android:textSize="12sp" android:layout_marginTop="4dp"/>
-        </LinearLayout>
+        <FrameLayout
+            android:id="@+id/navHome"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+            <RelativeLayout
+                android:id="@+id/navHomeContainer"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:layout_gravity="center">
+                <ImageView
+                    android:id="@+id/iconHome"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/ic_home"
+                    app:tint="#2563EB" />
+            </RelativeLayout>
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/navTools"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+            <RelativeLayout
+                android:id="@+id/navToolsContainer"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:layout_gravity="center">
+                <ImageView
+                    android:id="@+id/iconTools"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/ic_grid"
+                    app:tint="#94A3B8" />
+            </RelativeLayout>
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/navScan"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+            <RelativeLayout
+                android:id="@+id/navScanContainer"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_gravity="center"
+                android:background="@drawable/bg_scan_fab"
+                android:elevation="8dp">
+                <ImageView
+                    android:id="@+id/iconScan"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/ic_scan"
+                    app:tint="#FFFFFF" />
+            </RelativeLayout>
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/navReport"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+            <RelativeLayout
+                android:id="@+id/navReportContainer"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:layout_gravity="center">
+                <ImageView
+                    android:id="@+id/iconReport"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/ic_document"
+                    app:tint="#94A3B8" />
+            </RelativeLayout>
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/navStats"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+            <RelativeLayout
+                android:id="@+id/navStatsContainer"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:layout_gravity="center">
+                <ImageView
+                    android:id="@+id/iconStats"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/ic_stats"
+                    app:tint="#94A3B8" />
+            </RelativeLayout>
+        </FrameLayout>
     </LinearLayout>
 
     <!-- Main Content -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/topBar"
         android:layout_above="@+id/bottomNav"
-        android:layout_marginTop="-16dp"
-        android:scrollbars="none">
+        android:scrollbars="none"
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <androidx.cardview.widget.CardView
+            <!-- Hero Section -->
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="80dp"
-                app:cardCornerRadius="28dp"
-                app:cardElevation="0dp"
-                app:cardBackgroundColor="#2563EB"
-                app:cardPreventCornerOverlap="true">
-                <!-- This CardView is now the blue bubble background -->
-            </androidx.cardview.widget.CardView>
-            
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_hero_gradient"
+                android:paddingHorizontal="20dp"
+                android:paddingTop="20dp"
+                android:paddingBottom="120dp">
+
+                <ImageView
+                    android:id="@+id/menuIcon"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/ic_menu"
+                    android:background="@drawable/bg_icon_circle_white"
+                    android:padding="10dp"
+                    app:tint="#2563EB" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="8dp"
+                    android:text="Secure Bharat"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <ImageView
+                    android:id="@+id/profileBtn"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_alignParentEnd="true"
+                    android:src="@drawable/ic_profile"
+                    android:background="@drawable/bg_profile_circle" />
+
+                <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="70dp">
+
+                <ImageView
+                    android:id="@+id/shieldIcon"
+                    android:layout_width="130dp"
+                    android:layout_height="130dp"
+                    android:layout_centerHorizontal="true"
+                    android:background="@drawable/bg_shield_circle"
+                    android:padding="30dp"
+                    android:src="@drawable/ic_shield_large_white" />
+
+                <ImageView
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_alignEnd="@id/shieldIcon"
+                    android:layout_alignBottom="@id/shieldIcon"
+                    android:layout_marginEnd="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:src="@drawable/ic_check_circle"
+                    android:background="@drawable/bg_check_circle"
+                    android:padding="8dp" />
+            </RelativeLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="220dp"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Your Device is Safe"
+                        android:textColor="#FFFFFF"
+                        android:textSize="26sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="Real-time protection active"
+                        android:textColor="#BFDBFE"
+                        android:textSize="13sp"
+                        android:background="@drawable/bg_status_pill"
+                        android:paddingHorizontal="18dp"
+                        android:paddingVertical="7dp" />
+                </LinearLayout>
+            </RelativeLayout>
+
+            <!-- White Content Card with Animation -->
             <LinearLayout
+                android:id="@+id/contentCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingHorizontal="18dp"
-                android:layout_marginTop="-50dp"
-                android:paddingBottom="24dp">
+                android:layout_marginTop="-100dp"
+                android:background="@drawable/bg_content_card"
+                android:paddingHorizontal="20dp"
+                android:paddingTop="28dp"
+                android:paddingBottom="40dp">
 
-                <!-- Welcome Header -->
-                <RelativeLayout 
-                    android:layout_width="match_parent" 
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_card_white"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:id="@+id/welcomeText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:text="Welcome back, Aditya 👋"
-                        android:textColor="#1F2937"
-                        android:textSize="18sp"
-                        android:fontFamily="sans-serif-medium"
-                        android:textStyle="bold" />
-
-                    <ImageView
-                        android:id="@+id/detailed_report"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:src="@drawable/ic_arrow_right"
-                        app:tint="#9CA3AF" />
-                </RelativeLayout>
-
-                <!-- Protection Status Banner -->
+                <!-- Stats Cards Row -->
                 <LinearLayout
+                    android:id="@+id/statsCardsRow"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:background="@drawable/bg_protected_gradient"
-                    android:gravity="center"
-                    android:padding="18dp">
-                    <ImageView android:layout_width="26dp" android:layout_height="26dp" android:src="@drawable/ic_shield_check" app:tint="@android:color/white" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="10dp" android:text="Your Device is Protected" android:textColor="@android:color/white" android:textSize="17sp" android:fontFamily="sans-serif-medium" android:textStyle="bold" />
-                </LinearLayout>
+                    android:orientation="horizontal"
+                    android:weightSum="2">
 
-                <!-- Stats Cards -->
-                <LinearLayout 
-                    android:layout_width="match_parent" 
-                    android:layout_height="wrap_content" 
-                    android:layout_marginTop="16dp"
-                    android:baselineAligned="false">
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/threatsCard"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="10dp"
+                        app:cardCornerRadius="20dp"
+                        app:cardElevation="2dp"
+                        app:cardBackgroundColor="#FFFFFF">
 
-                    <LinearLayout
-                        android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="8dp"
-                        android:background="@drawable/bg_card_white" android:orientation="vertical" android:padding="14dp">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Threats Detected" android:textSize="13sp" android:textColor="#6B7280" android:fontFamily="sans-serif-medium" />
-                        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="4dp" android:gravity="center_vertical">
-                            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_shield_gray"/>
-                            <TextView android:id="@+id/threats_detected_text" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textSize="28sp" android:textStyle="bold" android:textColor="#1F2937" android:layout_marginStart="8dp"/>
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="24dp"
+                            android:gravity="center">
+
+                            <ImageView
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:src="@drawable/ic_shield"
+                                app:tint="#EF4444" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="10dp"
+                                android:text="THREATS"
+                                android:textColor="#9CA3AF"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:letterSpacing="0.1" />
+
+                            <TextView
+                                android:id="@+id/threatCountText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="6dp"
+                                android:text="0"
+                                android:textColor="#1F2937"
+                                android:textSize="36sp"
+                                android:textStyle="bold" />
                         </LinearLayout>
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Updated 3 mins ago" android:textSize="11sp" android:textColor="#9CA3AF" tools:ignore="SmallSp" />
-                    </LinearLayout>
-                    
-                    <LinearLayout
-                        android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="8dp"
-                        android:background="@drawable/bg_card_white" android:orientation="vertical" android:padding="14dp">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Alerts Count" android:textSize="13sp" android:textColor="#6B7280" android:fontFamily="sans-serif-medium" />
-                        <TextView android:id="@+id/scam_count_text" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="#EF4444" android:textSize="28sp" android:textStyle="bold" android:layout_marginTop="4dp"/>
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Updated 3 mins ago" android:textSize="11sp" android:textColor="#9CA3AF" tools:ignore="SmallSp" />
-                    </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/alertsCard"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="10dp"
+                        app:cardCornerRadius="20dp"
+                        app:cardElevation="2dp"
+                        app:cardBackgroundColor="#FFFFFF">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="24dp"
+                            android:gravity="center">
+
+                            <ImageView
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:src="@drawable/ic_bell"
+                                app:tint="#F59E0B" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="10dp"
+                                android:text="ALERTS"
+                                android:textColor="#9CA3AF"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:letterSpacing="0.1" />
+
+                            <TextView
+                                android:id="@+id/alertCountText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="6dp"
+                                android:text="0"
+                                android:textColor="#1F2937"
+                                android:textSize="36sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
                 </LinearLayout>
 
                 <!-- Security Tools Section -->
-                <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="24dp">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Security Tools" android:textSize="20sp" android:textStyle="bold" android:fontFamily="sans-serif-medium" android:textColor="#1F2937" />
-                    <ImageView
-                        android:id="@+id/viewAllVideos"
-                        android:layout_width="36dp" android:layout_height="36dp"
+                <RelativeLayout
+                    android:id="@+id/toolsHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="36dp"
+                    android:layout_marginBottom="4dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Security Tools"
+                        android:textColor="#1F2937"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/viewAllTools"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
-                        android:background="@drawable/bg_circle_green"
-                        android:padding="9dp"
-                        android:src="@drawable/ic_arrow_up"
-                        app:tint="@android:color/white"
-                        android:contentDescription="View All" />
+                        android:layout_centerVertical="true"
+                        android:text="VIEW ALL"
+                        android:textColor="#2563EB"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.08" />
                 </RelativeLayout>
 
-                <!-- Tool Buttons Grid -->
-                <TableLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:stretchColumns="*">
-
-                    <TableRow>
-                        <LinearLayout android:id="@+id/app_risk_scanner" android:orientation="horizontal" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:background="@drawable/bg_card_white" android:gravity="center_vertical" android:padding="12dp" android:layout_marginEnd="8dp" android:layout_marginBottom="16dp">
-                            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:background="@drawable/bg_circle_orange" android:padding="10dp" android:src="@drawable/ic_qr_scan" app:tint="@android:color/white" />
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:text="App Scanner" android:textStyle="bold" android:textColor="#374151" android:textSize="15sp" />
-                        </LinearLayout>
-                        <LinearLayout android:id="@+id/check_link" android:orientation="horizontal" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:background="@drawable/bg_card_white" android:gravity="center_vertical" android:padding="12dp" android:layout_marginStart="8dp" android:layout_marginBottom="16dp">
-                            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:background="@drawable/bg_circle_blue" android:padding="10dp" android:src="@drawable/ic_link_check" app:tint="@android:color/white" />
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:text="Link Safely" android:textStyle="bold" android:textColor="#374151" android:textSize="15sp" />
-                        </LinearLayout>
-                    </TableRow>
-
-                    <TableRow>
-                        <LinearLayout android:id="@+id/fraud_number_lookup" android:orientation="horizontal" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:background="@drawable/bg_card_white" android:gravity="center_vertical" android:padding="12dp" android:layout_marginEnd="8dp">
-                            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:background="@drawable/bg_circle_blue" android:padding="10dp" android:src="@drawable/ic_phone_search" app:tint="@android:color/white" />
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:text="Number Lookup" android:textStyle="bold" android:textColor="#374151" android:textSize="15sp" />
-                        </LinearLayout>
-                        <LinearLayout android:id="@+id/wifi_guard" android:orientation="horizontal" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:background="@drawable/bg_card_white" android:gravity="center_vertical" android:padding="12dp" android:layout_marginStart="8dp">
-                            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:background="@drawable/bg_circle_blue" android:padding="10dp" android:src="@drawable/ic_ocr" app:tint="@android:color/white" />
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:text="OCR Scanner" android:textStyle="bold" android:textColor="#374151" android:textSize="15sp" />
-                        </LinearLayout>
-                    </TableRow>
-
-                </TableLayout>
-
-                <!-- Security Tip of the Day -->
+                <!-- Tools Grid -->
                 <LinearLayout
+                    android:id="@+id/toolsGrid"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
                     android:layout_marginTop="16dp"
-                    android:background="@drawable/bg_card_white"
-                    android:padding="16dp">
+                    android:orientation="vertical">
 
+                    <!-- Row 1 -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:layout_marginBottom="8dp">
+                        android:weightSum="2">
 
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_lightbulb"
-                            app:tint="#F59E0B"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
+                        <androidx.cardview.widget.CardView
+                            android:id="@+id/appScanCard"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="Tip of the Day"
-                            android:textSize="16sp"
-                            android:textStyle="bold"
-                            android:fontFamily="sans-serif-medium"
-                            android:textColor="#1F2937"
-                            android:layout_marginStart="8dp"/>
+                            android:layout_weight="1"
+                            android:layout_marginEnd="10dp"
+                            android:layout_marginBottom="16dp"
+                            app:cardCornerRadius="18dp"
+                            app:cardElevation="2dp"
+                            app:cardBackgroundColor="#FFFFFF">
 
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:padding="18dp"
+                                android:gravity="center_vertical">
+
+                                <ImageView
+                                    android:layout_width="50dp"
+                                    android:layout_height="50dp"
+                                    android:src="@drawable/ic_apps"
+                                    android:background="@drawable/bg_tool_icon_orange"
+                                    android:padding="13dp"
+                                    app:tint="#FFFFFF" />
+
+                                <LinearLayout
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:layout_marginStart="14dp"
+                                    android:orientation="vertical">
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="App Scan"
+                                        android:textColor="#1F2937"
+                                        android:textSize="16sp"
+                                        android:textStyle="bold" />
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="SAFE"
+                                        android:textColor="#10B981"
+                                        android:textSize="11sp"
+                                        android:textStyle="bold"
+                                        android:layout_marginTop="3dp" />
+                                </LinearLayout>
+                            </LinearLayout>
+                        </androidx.cardview.widget.CardView>
+
+                        <androidx.cardview.widget.CardView
+                            android:id="@+id/linkGuardCard"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="10dp"
+                            android:layout_marginBottom="16dp"
+                            app:cardCornerRadius="18dp"
+                            app:cardElevation="2dp"
+                            app:cardBackgroundColor="#FFFFFF">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:padding="18dp"
+                                android:gravity="center_vertical">
+
+                                <ImageView
+                                    android:layout_width="50dp"
+                                    android:layout_height="50dp"
+                                    android:src="@drawable/ic_link"
+                                    android:background="@drawable/bg_tool_icon_purple"
+                                    android:padding="13dp"
+                                    app:tint="#FFFFFF" />
+
+                                <LinearLayout
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:layout_marginStart="14dp"
+                                    android:orientation="vertical">
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="Link Guard"
+                                        android:textColor="#1F2937"
+                                        android:textSize="16sp"
+                                        android:textStyle="bold" />
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="ACTIVE"
+                                        android:textColor="#10B981"
+                                        android:textSize="11sp"
+                                        android:textStyle="bold"
+                                        android:layout_marginTop="3dp" />
+                                </LinearLayout>
+                            </LinearLayout>
+                        </androidx.cardview.widget.CardView>
                     </LinearLayout>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Never share your OTP with anyone, even if they claim to be from a bank. Your bank will never ask for your OTP."
-                        android:textSize="14sp"
-                        android:lineSpacingExtra="4dp"
-                        android:textColor="#4B5563"/>
-
-                </LinearLayout>
-
-                <!-- Antivirus Status Bar -->
-                <RelativeLayout
-                    android:id="@+id/deviceStatusBar"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp">
-                    <ImageView
-                        android:layout_width="64dp" android:layout_height="64dp"
-                        android:layout_marginStart="8dp"
-                        android:layout_centerVertical="true"
-                        android:src="@drawable/ic_shield_large"
-                        android:elevation="8dp" />
+                    <!-- Row 2 -->
                     <LinearLayout
-                        android:layout_width="match_parent" android:layout_height="wrap_content"
-                        android:layout_marginStart="40dp"
-                        android:background="@drawable/bg_antivirus_banner"
-                        android:gravity="center_vertical" 
-                        android:paddingVertical="18dp"
-                        android:paddingStart="48dp"
-                        android:paddingEnd="16dp">
-                        <TextView
-                            android:id="@+id/deviceStatusText"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Connected to Secure Anti-Virus"
-                            android:textColor="#1F2937"
-                            android:textSize="16sp"
-                            android:textStyle="bold"
-                            android:fontFamily="sans-serif-medium" />
-                    </LinearLayout>
-                </RelativeLayout>
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:weightSum="2">
 
+                        <androidx.cardview.widget.CardView
+                            android:id="@+id/callerIdCard"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="10dp"
+                            app:cardCornerRadius="18dp"
+                            app:cardElevation="2dp"
+                            app:cardBackgroundColor="#FFFFFF">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:padding="18dp"
+                                android:gravity="center_vertical">
+
+                                <ImageView
+                                    android:layout_width="50dp"
+                                    android:layout_height="50dp"
+                                    android:src="@drawable/ic_phone"
+                                    android:background="@drawable/bg_tool_icon_blue"
+                                    android:padding="13dp"
+                                    app:tint="#FFFFFF" />
+
+                                <LinearLayout
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:layout_marginStart="14dp"
+                                    android:orientation="vertical">
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="Caller ID"
+                                        android:textColor="#1F2937"
+                                        android:textSize="16sp"
+                                        android:textStyle="bold" />
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="ON"
+                                        android:textColor="#6B7280"
+                                        android:textSize="11sp"
+                                        android:textStyle="bold"
+                                        android:layout_marginTop="3dp" />
+                                </LinearLayout>
+                            </LinearLayout>
+                        </androidx.cardview.widget.CardView>
+
+                        <androidx.cardview.widget.CardView
+                            android:id="@+id/wifiGuardCard"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="10dp"
+                            app:cardCornerRadius="18dp"
+                            app:cardElevation="2dp"
+                            app:cardBackgroundColor="#FFFFFF">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:padding="18dp"
+                                android:gravity="center_vertical">
+
+                                <ImageView
+                                    android:layout_width="50dp"
+                                    android:layout_height="50dp"
+                                    android:src="@drawable/ic_wifi"
+                                    android:background="@drawable/bg_tool_icon_teal"
+                                    android:padding="13dp"
+                                    app:tint="#FFFFFF" />
+
+                                <LinearLayout
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:layout_marginStart="14dp"
+                                    android:orientation="vertical">
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="WiFi Guard"
+                                        android:textColor="#1F2937"
+                                        android:textSize="16sp"
+                                        android:textStyle="bold" />
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="SECURE"
+                                        android:textColor="#10B981"
+                                        android:textSize="11sp"
+                                        android:textStyle="bold"
+                                        android:layout_marginTop="3dp" />
+                                </LinearLayout>
+                            </LinearLayout>
+                        </androidx.cardview.widget.CardView>
+                    </LinearLayout>
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
