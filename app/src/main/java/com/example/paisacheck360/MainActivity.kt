@@ -59,8 +59,13 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, FraudCallSummaryActivity::class.java))
         }
 
+        // UPDATED: Now opens AppRiskScannerActivity instead of showing Toast
+        appScanCard.setOnClickListener {
+            animateCardClick(appScanCard)
+            startActivity(Intent(this, AppRiskScannerActivity::class.java))
+        }
+
         val soon = { Toast.makeText(this, "Coming soon", Toast.LENGTH_SHORT).show() }
-        appScanCard.setOnClickListener { animateCardClick(appScanCard); soon() }
         linkGuardCard.setOnClickListener { animateCardClick(linkGuardCard); soon() }
         wifiGuardCard.setOnClickListener { animateCardClick(wifiGuardCard); soon() }
     }
