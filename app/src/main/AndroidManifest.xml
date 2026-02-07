@@ -18,14 +18,12 @@
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_CALL_LOG" />
     <uses-permission android:name="android.permission.ANSWER_PHONE_CALLS" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" tools:ignore="QueryAllPackagesPermission" />
 
     <application
@@ -64,11 +62,11 @@
 
         <activity android:name=".LogsActivity" android:exported="true" />
         <activity android:name=".SmsSummaryActivity" android:exported="true" />
+
         <activity android:name=".FraudCallSummaryActivity" android:exported="true" />
+
         <activity android:name=".ScamReportActivity" android:exported="true" />
-
         <activity android:name=".AppRiskScannerActivity" android:exported="true" />
-
         <activity android:name=".WiFiGuardActivity" android:exported="true" />
 
         <activity

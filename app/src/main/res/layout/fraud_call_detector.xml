@@ -10,11 +10,10 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Title -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:drawableStart="@drawable/ic_shield"
+            android:drawableStart="@drawable/ic_shield_check"
             android:drawablePadding="8dp"
             android:text="Fraud Call Detector"
             android:textColor="#0077B6"
@@ -22,9 +21,6 @@
             android:textStyle="bold"
             android:paddingBottom="16dp" />
 
-
-
-        <!-- Scan Stats Buttons -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -32,24 +28,27 @@
             android:layout_marginBottom="16dp">
 
             <Button
+                android:id="@+id/txt_calls_scanned"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="X Call scanned | Y scams flagged"
+                android:text="0 Calls scanned | 0 scams flagged"
                 android:backgroundTint="#E1F0FF"
-                android:textColor="#155B83" />
+                android:textColor="#155B83"
+                android:enabled="false" />
 
             <Button
+                android:id="@+id/txt_scams_flagged"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Reported Scams Summary"
                 android:backgroundTint="#E1F0FF"
                 android:textColor="#155B83"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="8dp"
+                android:enabled="false" />
         </LinearLayout>
 
-
-        <!-- Scan Now -->
         <Button
+            android:id="@+id/btn_scan_now"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Scan Now"
@@ -57,8 +56,8 @@
             android:backgroundTint="#FFD166"
             android:layout_marginBottom="16dp" />
 
-        <!-- Search -->
         <EditText
+            android:id="@+id/search_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Search or filter messages"
@@ -68,7 +67,19 @@
             android:textColor="#000000"
             android:textColorHint="#999999" />
 
-        <!-- High Risk Call Card -->
+        <LinearLayout
+            android:id="@+id/callListContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Historical Examples:"
+            android:textStyle="italic"
+            android:paddingBottom="8dp"/>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -76,8 +87,7 @@
             android:background="@drawable/bg_card"
             android:padding="12dp"
             android:layout_marginBottom="12dp"
-            android:elevation="2dp"
-            android:clipToOutline="true">
+            android:elevation="2dp">
 
             <TextView
                 android:layout_width="match_parent"
@@ -88,13 +98,6 @@
                 android:textColor="#000000" />
 
             <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="“This is the fraud department from your bank.”"
-                android:textSize="12sp"
-                android:paddingTop="4dp" />
-
-            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="High Risk"
@@ -103,77 +106,5 @@
                 android:layout_marginTop="6dp" />
         </LinearLayout>
 
-        <!-- Medium Risk Call Card -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-
-            android:background="@drawable/bg_card"
-            android:padding="12dp"
-            android:layout_marginBottom="12dp"
-            android:elevation="2dp"
-            android:clipToOutline="true">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Caller ID: 🚓 “Local Police Dept.”"
-                android:textStyle="bold"
-                android:textSize="14sp"
-                android:textColor="#000000" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="“You are under investigation for suspicious activity. A warrant will be issued...”"
-                android:textSize="12sp"
-                android:paddingTop="4dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Medium Risk"
-                android:textColor="#FFA500"
-                android:textStyle="bold"
-                android:layout_marginTop="6dp" />
-        </LinearLayout>
-
-        <!-- Low Risk Call Card -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-
-            android:orientation="vertical"
-            android:background="@drawable/bg_card"
-            android:padding="12dp"
-            android:layout_marginBottom="12dp"
-
-            android:elevation="2dp"
-            android:clipToOutline="true">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Caller ID: 💻 “Windows Support Center”"
-                android:textStyle="bold"
-                android:textSize="14sp"
-                android:textColor="#000000" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="“We’ve detected a virus on your computer. Your personal data is at risk.”"
-                android:textSize="12sp"
-                android:paddingTop="4dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Low Risk"
-                android:textColor="#4CAF50"
-                android:textStyle="bold"
-                android:layout_marginTop="6dp" />
-        </LinearLayout>
     </LinearLayout>
 </ScrollView>
