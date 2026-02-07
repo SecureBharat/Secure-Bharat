@@ -10,6 +10,7 @@ import android.graphics.PixelFormat
 import android.os.Build
 import android.os.IBinder
 import android.provider.Settings
+import android.provider.Settings.Secure.ANDROID_ID
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -36,7 +37,7 @@ class CallPopupService : Service() {
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
 
         val androidID =
-            Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID) ?: "guest"
+            Settings.Secure.getString(contentResolver, ANDROID_ID) ?: "guest"
 
         // ✅ Use default Firebase instance – NO URL STRING ANYMORE
         db = FirebaseDatabase
@@ -204,7 +205,7 @@ class CallPopupService : Service() {
     }
 
     private fun saveFeedback(number: String, feedback: String) {
-        val androidID = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+        val androidID = Settings.Secure.getString(contentResolver, ANDROID_ID)
         if (androidID.isNullOrEmpty()) {
             Log.e("CallPopupService", "Could not get Android ID")
             return

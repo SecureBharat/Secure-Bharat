@@ -18,9 +18,9 @@ class FraudCallSummaryActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_fraud_call_summary)
+        setContentView(R.layout.activity_call_history)
 
-        callListContainer = findViewById(R.id.callListContainer)
+
 
         // 1. Get Android ID to find the user's data
         val androidID = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID) ?: "guest"

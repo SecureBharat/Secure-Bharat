@@ -149,7 +149,7 @@ class MainActivity : AppCompatActivity() {
         viewAllTools.setOnClickListener { comingSoon() }
         appScanCard.setOnClickListener { animateCardClick(appScanCard); comingSoon() }
         linkGuardCard.setOnClickListener { animateCardClick(linkGuardCard); comingSoon() }
-        callerIdCard.setOnClickListener { animateCardClick(callerIdCard); comingSoon() }
+        callerIdCard.setOnClickListener { animateCardClick(callerIdCard); startActivity(Intent(this, CallHistoryActivity::class.java)) }
         wifiGuardCard.setOnClickListener { animateCardClick(wifiGuardCard); comingSoon() }
     }
 
@@ -370,27 +370,17 @@ class MainActivity : AppCompatActivity() {
             if (user != null) {
                 database = FirebaseDatabase.getInstance().reference
                     .child("users").child(user.uid).child("profile")
-                listenToFirebaseData()
-            }
+            } 
         }
-    }
-
-    private fun listenToFirebaseData() {
-        database.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                if (!snapshot.exists()) return
-            }
-            override fun onCancelled(error: DatabaseError) {}
-        })
     }
 
     private fun updateStats() {
         val prefs = getSharedPreferences("SecureBharatPrefs", Context.MODE_PRIVATE)
-        val threats = prefs.getInt("threat_count", 0)
-        val alerts = prefs.getInt("alert_count", 0)
+        val threatCount = prefs.getInt("threat_count", 0)
+        val alertCount = prefs.getInt("alert_count", 0)
 
-        threatCountText.text = threats.toString()
-        alertCountText.text = alerts.toString()
+        threatCountText.text = threatCount.toString()
+        alertCountText.text = alertCount.toString()
     }
 
     override fun onStart() {
@@ -400,11 +390,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        auth.removeAuthStateListener(authStateListener)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        updateStats()
+        if (::authStateListener.isInitialized) {
+            auth.removeAuthStateListener(authStateListener)
+        }
     }
 }
