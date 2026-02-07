@@ -2,29 +2,44 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-feature android:name="android.hardware.telephony" android:required="false" />
+    <!-- =============================================================== -->
+    <!--                         Permissions                           -->
+    <!-- =============================================================== -->
 
+    <!-- Core Functionality -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- Call & SMS -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_CALL_LOG" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" tools:ignore="ProtectedPermissions" />
+
+    <!-- Special Permissions for Popups & Listeners -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Foreground Service Types (Required for Android 14+) -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_PHONE_CALL" />
+
+    <!-- WiFi & Location -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.READ_CALL_LOG" />
-    <uses-permission android:name="android.permission.ANSWER_PHONE_CALLS" />
-    <uses-permission android:name="android.permission.CALL_PHONE" />
-    <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <!-- App Scanning -->
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" tools:ignore="QueryAllPackagesPermission" />
+
+    <!-- =============================================================== -->
+    <!--                        Application                          -->
+    <!-- =============================================================== -->
 
     <application
         android:name=".App"
@@ -33,11 +48,12 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Material3.DayNight.NoActionBar"
+        android:theme="@style/Theme.PaisaCheck360"
+        android:largeHeap="true"
+        android:networkSecurityConfig="@xml/network_security_config"
         tools:targetApi="34">
 
-        <activity android:name=".ProfileActivity" />
-
+        <!-- Main Activities -->
         <activity
             android:name=".LoginActivity"
             android:exported="true"
@@ -47,53 +63,70 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".MainActivity" android:exported="false" />
+        <activity android:name=".ProfileActivity" android:exported="false" />
 
-        <activity
-            android:name=".MainActivity"
-            android:exported="true"
-            android:theme="@style/Theme.PaisaCheck360" />
-
+        <!-- Tool Activities -->
         <activity android:name=".LinkScannerActivity" android:exported="false" />
+        <activity android:name=".AppRiskScannerActivity" android:exported="false" />
+        <activity android:name=".WiFiGuardActivity" android:exported="false" />
+        <activity android:name=".CallHistoryActivity" android:exported="false" />
+        <activity android:name=".SmsSummaryActivity" android:exported="false" />
 
+        <!-- Dialog & Report Activities -->
         <activity
-            android:name=".BlockedUrlActivity"
+            android:name="com.example.securebharat.CallFeedbackActivity"
             android:exported="false"
-            android:theme="@style/Theme.Material3.DayNight.Dialog" />
+            android:theme="@style/Theme.Material3.DayNight.Dialog.Alert" />
+        <activity android:name=".BlockedUrlActivity" android:exported="false" android:theme="@style/Theme.Material3.DayNight.Dialog" />
+        <activity android:name=".ScamReportActivity" android:exported="false" />
 
-        <activity android:name=".LogsActivity" android:exported="true" />
-        <activity android:name=".SmsSummaryActivity" android:exported="true" />
+        <!-- =============================================================== -->
+        <!--                          Services                             -->
+        <!-- =============================================================== -->
 
-        <activity android:name=".FraudCallSummaryActivity" android:exported="true" />
+        <service
+            android:name=".CallPopupService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="phoneCall">
+            <property android:name="android.app.property.SPECIAL_USE_FGS_SUBTYPE" android:value="Used to display a real-time caller ID popup to warn users about potential scam calls." />
+        </service>
 
-        <activity android:name=".ScamReportActivity" android:exported="true" />
-        <activity android:name=".AppRiskScannerActivity" android:exported="true" />
-        <activity android:name=".WiFiGuardActivity" android:exported="true" />
+        <service
+            android:name=".ScamPopupService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property android:name="android.app.property.SPECIAL_USE_FGS_SUBTYPE" android:value="Used to display an urgent alert popup over other apps when a scam SMS or notification is detected." />
+        </service>
 
-        <activity
-            android:name=".CallFeedbackActivity"
+        <service
+            android:name=".SMSNotificationListener"
+            android:enabled="true"
             android:exported="true"
-            android:theme="@style/Theme.Material3.DayNight.Dialog.Alert"
-            android:launchMode="singleTop" />
-
-        <service android:name=".ScamPopupService" android:enabled="true" android:exported="false" android:foregroundServiceType="specialUse" />
-        <service android:name=".CallPopupService" android:enabled="true" android:exported="false" android:foregroundServiceType="specialUse" />
-        <service android:name=".SMSNotificationListener" android:enabled="true" android:exported="true" android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
             <intent-filter>
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
         </service>
 
+        <!-- =============================================================== -->
+        <!--                         Receivers                             -->
+        <!-- =============================================================== -->
+
         <receiver android:name=".SMSReceiver" android:exported="true">
-            <intent-filter android:priority="999">
+            <intent-filter android:priority="1000">
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
         </receiver>
 
         <receiver android:name=".CallReceiver" android:exported="true">
-            <intent-filter android:priority="999">
+            <intent-filter android:priority="1000">
                 <action android:name="android.intent.action.PHONE_STATE" />
             </intent-filter>
         </receiver>
 
     </application>
+
 </manifest>
