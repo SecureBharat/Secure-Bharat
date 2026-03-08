@@ -9,6 +9,7 @@ Aditya – Lead developer, logic, coordinator
 
 > Sujay – Testing, Documentation
 
+> Kunal – Scam Detection Logic, Android Development
 ---
 
 ## 📱 Features
