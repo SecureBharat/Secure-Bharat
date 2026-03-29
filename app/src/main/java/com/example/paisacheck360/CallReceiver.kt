@@ -5,20 +5,29 @@ import android.content.Context
 import android.content.Intent
 import android.telephony.TelephonyManager
 import android.util.Log
+import androidx.core.content.ContextCompat
 
 class CallReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action == TelephonyManager.ACTION_PHONE_STATE_CHANGED) {
-            val state = intent.getStringExtra(TelephonyManager.EXTRA_STATE)
-            val number = intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER)
+        val state = intent.getStringExtra(TelephonyManager.EXTRA_STATE)
+        val number = intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER)
 
-            if (state == TelephonyManager.EXTRA_STATE_RINGING && number != null) {
-                Log.d("CallReceiver", "Incoming call from: $number")
+        val serviceIntent = Intent(context, CallPopupService::class.java)
 
-                // This starts the ACTUAL service
-                val serviceIntent = Intent(context, CallPopupService::class.java)
-                serviceIntent.putExtra("callerNumber", number)
-                context.startService(serviceIntent)
+        when (state) {
+            TelephonyManager.EXTRA_STATE_RINGING -> {
+                // REAL-TIME TRIGGER: Show popup while ringing
+                if (number != null) {
+                    Log.d("SecureBharat-Call", "🔔 RINGING: Incoming scam check for $number")
+                    serviceIntent.putExtra("callerNumber", number)
+                    serviceIntent.putExtra("isRinging", true)
+                    ContextCompat.startForegroundService(context, serviceIntent)
+                }
+            }
+            TelephonyManager.EXTRA_STATE_OFFHOOK, TelephonyManager.EXTRA_STATE_IDLE -> {
+                // CLEANUP: Remove popup when call is answered or missed
+                Log.d("SecureBharat-Call", "Call state $state: Removing popup")
+                context.stopService(serviceIntent)
             }
         }
     }

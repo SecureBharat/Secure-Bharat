@@ -1,266 +1,155 @@
 package com.example.paisacheck360
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.Service
+import android.app.*
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
+import android.graphics.Color
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.IBinder
 import android.provider.Settings
-import android.provider.Settings.Secure.ANDROID_ID
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
-import android.widget.Button
 import android.widget.TextView
 import androidx.core.app.NotificationCompat
-import com.google.firebase.database.*
-import java.text.SimpleDateFormat
-import java.util.*
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ServerValue
 
 class CallPopupService : Service() {
 
     private lateinit var windowManager: WindowManager
     private var popupView: View? = null
-    private var callerNumber: String = "Unknown"
-    private lateinit var db: DatabaseReference
+    private var isPopupVisible = false
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onCreate() {
         super.onCreate()
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
-
-        val androidID =
-            Settings.Secure.getString(contentResolver, ANDROID_ID) ?: "guest"
-
-        // ✅ Use default Firebase instance – NO URL STRING ANYMORE
-        db = FirebaseDatabase
-            .getInstance()
-            .reference
-            .child("users")
-            .child(androidID)
-            .child("call_feedback")
+        startInForeground()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-
-        if (intent?.action == "ACTION_STOP") {
-            Log.d("CallPopupService", "Received STOP action. Shutting down.")
-            stopSelf()
-            return START_NOT_STICKY
+        val number = intent?.getStringExtra("callerNumber") ?: "Unknown"
+        if (!isPopupVisible) {
+            fetchAndShowRealTimeAlert(number)
         }
-
-        val numberFromIntent = intent?.getStringExtra("callerNumber")
-        callerNumber = if (numberFromIntent.isNullOrEmpty()) "Unknown" else numberFromIntent
-
-        startInForeground()
-
-        if (popupView == null) {
-            checkNumberStatus(callerNumber)
-        } else {
-            Log.w("CallPopupService", "Popup is already showing, ignoring new call.")
-        }
-
         return START_NOT_STICKY
     }
 
-    private fun checkNumberStatus(number: String) {
-        val last10Digits = if (number.length > 10) number.takeLast(10) else number
+    private fun fetchAndShowRealTimeAlert(number: String) {
+        val safeKey = number.replace(Regex("[.#$\\[\\]]"), "_")
+        val globalRef = FirebaseDatabase.getInstance().reference.child("global_scam_reports").child(safeKey)
 
-        db.orderByKey().addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                var entryFound: DataSnapshot? = null
-
-                for (child in snapshot.children) {
-                    val dbKey = child.key
-                    if (dbKey != null && dbKey.takeLast(10) == last10Digits) {
-                        entryFound = child
-                        break
-                    }
-                }
-
-                if (entryFound != null) {
-                    val status = entryFound.child("status").getValue(String::class.java)
-
-                    when (status) {
-                        "Scam" -> {
-                            Log.d(
-                                "CallPopupService",
-                                "Number $number is a known scam. Showing alert."
-                            )
-                            showPopup(number, isKnownScam = true)
-                        }
-
-                        "Safe" -> {
-                            Log.d("CallPopupService", "Number $number is known and safe. Ignoring.")
-                            stopSelf()
-                        }
-
-                        else -> {
-                            Log.d(
-                                "CallPopupService",
-                                "Number $number found but status is '$status'. Showing popup."
-                            )
-                            showPopup(number, isKnownScam = false)
-                        }
-                    }
-                } else {
-                    Log.d("CallPopupService", "Number $number is not in DB. Showing popup.")
-                    showPopup(number, isKnownScam = false)
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Log.e("CallPopupService", "Firebase check failed: ${error.message}")
-                showPopup(number, isKnownScam = false)
-            }
-        })
+        globalRef.get().addOnSuccessListener { snapshot ->
+            val scamCount = snapshot.child("scam_count").getValue(Long::class.java) ?: 0L
+            showOverlay(number, scamCount)
+        }.addOnFailureListener {
+            showOverlay(number, 0L)
+        }
     }
 
-    private fun showPopup(number: String, isKnownScam: Boolean) {
-        if (popupView != null) {
-            Log.w("CallPopupService", "Popup is already showing. Ignoring new request.")
-            return
-        }
+    private fun showOverlay(number: String, scamCount: Long) {
+        if (!Settings.canDrawOverlays(this)) return
 
-        popupView = LayoutInflater.from(this).inflate(R.layout.activity_call_feedback, null)
+        try {
+            val inflater = getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
+            popupView = inflater.inflate(R.layout.activity_call_feedback, null)
 
-        popupView?.let { view ->
+            // Layout parameters to sit in the middle of the screen
             val params = WindowManager.LayoutParams(
                 WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                     WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-                } else {
-                    WindowManager.LayoutParams.TYPE_PHONE
-                },
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                else
+                    WindowManager.LayoutParams.TYPE_PHONE,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
                 PixelFormat.TRANSLUCENT
-            )
-            params.gravity = Gravity.CENTER
+            ).apply { gravity = Gravity.CENTER }
 
-            val txtNumber = view.findViewById<TextView>(R.id.txtNumber)
-            val btnScam = view.findViewById<Button>(R.id.btnScam)
-            val btnSafe = view.findViewById<Button>(R.id.btnSafe)
+            popupView?.let { view ->
+                val txtNumber = view.findViewById<TextView>(R.id.txtNumber)
+                val btnScam = view.findViewById<View>(R.id.btnScam)
+                val btnSafe = view.findViewById<View>(R.id.btnSafe)
 
-            if (isKnownScam) {
-                txtNumber.text = "🚨 KNOWN SCAM CALL 🚨\n$number"
-                btnScam.visibility = View.GONE
-
-                btnSafe.visibility = View.VISIBLE
-                btnSafe.text = "OK"
-                btnSafe.setOnClickListener {
-                    removePopup()
-                    stopSelf()
+                if (scamCount > 0) {
+                    // REAL-TIME SCAM WARNING
+                    txtNumber.text = "🚨 HIGH RISK SCAM 🚨\n$number\nReported by $scamCount users!"
+                    txtNumber.setTextColor(Color.RED)
+                    view.setBackgroundColor(Color.parseColor("#FFE0E0")) // Light Red background
+                } else {
+                    txtNumber.text = "Incoming Call: $number\nIs this a scam?"
                 }
-            } else {
-                txtNumber.text = "Incoming Call: $number"
-                btnScam.visibility = View.VISIBLE
-                btnSafe.visibility = View.VISIBLE
-                btnSafe.text = "✅ Mark as Safe"
 
                 btnScam.setOnClickListener {
                     saveFeedback(number, "Scam")
-                    removePopup()
                     stopSelf()
                 }
+
                 btnSafe.setOnClickListener {
                     saveFeedback(number, "Safe")
-                    removePopup()
                     stopSelf()
                 }
-            }
 
-            try {
-                if (Settings.canDrawOverlays(this)) {
-                    windowManager.addView(view, params)
-                } else {
-                    Log.e(
-                        "CallPopupService",
-                        "Error: SYSTEM_ALERT_WINDOW permission not granted!"
-                    )
-                }
-            } catch (e: Exception) {
-                Log.e("CallPopupService", "Error adding view to WindowManager", e)
+                windowManager.addView(view, params)
+                isPopupVisible = true
             }
+        } catch (e: Exception) {
+            Log.e("CallPopupService", "Overlay Error: ${e.message}")
         }
     }
 
-    private fun removePopup() {
-        popupView?.let {
-            try {
-                windowManager.removeView(it)
-                popupView = null
-            } catch (e: Exception) {
-                Log.e("CallPopupService", "Error removing popup view", e)
-            }
+    private fun saveFeedback(number: String, status: String) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: "anonymous"
+        val safeKey = number.replace(Regex("[.#$\\[\\]]"), "_")
+        val rootRef = FirebaseDatabase.getInstance().reference
+
+        // Update User History
+        rootRef.child("users").child(userId).child("call_feedback").child(safeKey)
+            .setValue(mapOf("status" to status, "timestamp" to System.currentTimeMillis()))
+
+        // Update Global Counter
+        if (status == "Scam") {
+            rootRef.child("global_scam_reports").child(safeKey).child("scam_count")
+                .runTransaction(object : com.google.firebase.database.Transaction.Handler {
+                    override fun doTransaction(mutableData: com.google.firebase.database.MutableData): com.google.firebase.database.Transaction.Result {
+                        val current = mutableData.getValue(Long::class.java) ?: 0L
+                        mutableData.value = current + 1
+                        return com.google.firebase.database.Transaction.success(mutableData)
+                    }
+                    override fun onComplete(error: com.google.firebase.database.DatabaseError?, committed: Boolean, snapshot: com.google.firebase.database.DataSnapshot?) {}
+                })
         }
-    }
-
-    private fun saveFeedback(number: String, feedback: String) {
-        val androidID = Settings.Secure.getString(contentResolver, ANDROID_ID)
-        if (androidID.isNullOrEmpty()) {
-            Log.e("CallPopupService", "Could not get Android ID")
-            return
-        }
-
-        // ✅ Also use default instance here – NO URL
-        val dbRef = FirebaseDatabase
-            .getInstance()
-            .reference
-            .child("users")
-            .child(androidID)
-            .child("call_feedback")
-
-        val timestamp = SimpleDateFormat(
-            "yyyy-MM-dd HH:mm:ss",
-            Locale.getDefault()
-        ).format(Date())
-
-        val callData = mapOf(
-            "status" to feedback,
-            "timestamp" to timestamp
-        )
-
-        val safeNumberKey = number.replace(Regex("[.#$\\[\\]]"), "_")
-
-        dbRef.child(safeNumberKey).setValue(callData)
-            .addOnSuccessListener { Log.d("CallPopupService", "Feedback saved") }
-            .addOnFailureListener { e ->
-                Log.e("CallPopupService", "Failed to save feedback", e)
-            }
     }
 
     private fun startInForeground() {
         val channelId = "CallPopupChannel"
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                channelId,
-                "Call Popup Service",
-                NotificationManager.IMPORTANCE_LOW
-            )
-            (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
-                .createNotificationChannel(channel)
+            val channel = NotificationChannel(channelId, "Security", NotificationManager.IMPORTANCE_LOW)
+            (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(channel)
         }
+        val notification = NotificationCompat.Builder(this, channelId)
+            .setContentTitle("Secure Bharat").setContentText("Real-time call protection active").setSmallIcon(R.mipmap.ic_launcher).build()
 
-        val notification: Notification = NotificationCompat.Builder(this, channelId)
-            .setContentTitle("PaisaCheck360 Active")
-            .setContentText("Listening for scam calls.")
-            .setSmallIcon(R.mipmap.ic_launcher)
-            .build()
-
-        startForeground(2, notification)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            startForeground(2, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
+        } else {
+            startForeground(2, notification)
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        removePopup()
+        if (isPopupVisible) {
+            popupView?.let {
+                try { windowManager.removeView(it) } catch (e: Exception) {}
+            }
+        }
     }
 }
